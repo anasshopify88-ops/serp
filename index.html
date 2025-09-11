@@ -39,7 +39,7 @@
     font-weight:800;
     font-size:clamp(18px,2.2vw,28px);
     line-height:1.2;
-    white-space:nowrap; /* سطر واحد */
+    white-space:nowrap;
   }
   @media (max-width:700px){
     header{flex-direction:column;align-items:center;gap:10px}
@@ -221,7 +221,7 @@
 /* ========== تفعيل الذكاء الاصطناعي عبر الوِركر ========== */
 const AI_CONFIG = {
   enabled: true,
-  baseUrl: "https://seo-generate.anasshopify88.workers.dev",
+  baseUrl: "https://seo-generate.anasshopify88.workers.dev", // ضع رابط الـWorker هنا
   apiKey: "",
   provider: "cf",
   model: "@cf/meta/llama-3.1-8b-instruct",
@@ -372,7 +372,7 @@ function topKeywords(text, max=6){
 function makeTitleFrom(text){
   const kws = topKeywords(text, 5);
   let base = kws.slice(0,3).join(' | ');
-  if (!base) base = (text||'').trim().split(/\س+/).slice(0,6).join(' ');
+  if (!base) base = (text||'').trim().split(/\s+/).slice(0,6).join(' '); // (تم تصحيح \s)
   base = base.replace(/\s+/g,' ').trim();
   if (charCount(base) > TITLE_CHAR_LIMIT) base = truncateByChars(base, TITLE_CHAR_LIMIT);
   return base;
@@ -401,7 +401,7 @@ async function aiGenerate(raw){
   const sys = [
     "أنت مساعد سيو عربي. أعد عنوان SEO ووصف ميتا ورابط (slug) بالعربية الفصحى.",
     "القيود: العنوان ≤ 60 حرف. الوصف 150–160 حرف. slug بدون مسافات، بحروف عربية/لاتينية وأرقام وواصلة (-) فقط.",
-    "أعد JSON بالمفتاح: {\"title\":\"..\",\"meta\":\"..\",\"slug\":\"..\"} فقط."
+    'أعد JSON بالمفتاح: {"title":"..","meta":"..","slug":".."} فقط.'
   ].join("\n");
   const user = `الوصف:\n${raw}\n\nأعد الناتج وفق القيود أعلاه.`;
 
@@ -411,7 +411,6 @@ async function aiGenerate(raw){
     temperature: 0.3
   };
 
-  // طلب متين مع مهلة وتثبيت CORS
   const controller = new AbortController();
   const timeout = setTimeout(()=>controller.abort(), 25000);
   let respText = "";
@@ -571,12 +570,33 @@ async function generateFromRaw(){
   descInput .addEventListener('input', onInput);
   urlInput  .addEventListener('input', ()=>{ urlAutoMode = false; onInput(); });
 
+  // ✅ ربط زر "توليد" + اختصار لوحة المفاتيح
+  generateBtn.addEventListener('click', ()=>{
+    if (!rawInput.value.trim()){
+      rawInput.value = [titleInput.value, descInput.value, urlInput.value].filter(Boolean).join('\n');
+      wordInfo.textContent = `${wordCount(rawInput.value)} كلمة`;
+    }
+    generateFromRaw();
+  });
+  rawInput.addEventListener('keydown', (e)=>{
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      generateBtn.click();
+    }
+  });
+
+  // أزرار عامة
+  backBtn.addEventListener('click', ()=>history.back());
+  homeBtn.addEventListener('click', ()=>location.href = '/');
+
   window.addEventListener('resize', debounce(()=>{ render(); fitOneLine(toolNameEl,12,24); }, 150));
   window.addEventListener('orientationchange', ()=>{ setTimeout(()=>{ render(); fitOneLine(toolNameEl,12,24); }, 150); });
 
   const ro = new ResizeObserver(()=>{ render(); fitOneLine(toolNameEl,12,24); });
   [document.querySelector('.brand'), toolNameEl, serp, pUrl.parentElement, pDesc].forEach(el=> ro.observe(el));
 
+  const darkOn = document.body.classList.contains('dark');
+  darkBtn.setAttribute('aria-pressed', darkOn);
   darkBtn.addEventListener('click', ()=>{
     document.body.classList.toggle('dark');
     const on=document.body.classList.contains('dark');
