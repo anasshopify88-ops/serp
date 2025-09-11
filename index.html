@@ -6,74 +6,96 @@
 <title>أداة محاكاة مجانية لنتائج جوجل من أنس راشد</title>
 <style>
   :root{
+    /* أبعاد محاكاة جوجل (تُستخدم أيضًا للحساب بالبكسل) */
+    --title-w:600px; --desc-w:920px; --url-w:600px;
+
+    /* ألوان الواجهة */
     --bg:#f6f8fb; --text:#0f172a; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
-    --primary:#2563eb; --shadow:0 10px 30px rgba(2,8,23,.08);
-    --g-blue:#1a0dab; --g-url:#3c4043; --g-desc:#4d5156;
-    --title-w:600px; --desc-w:920px; --url-w:600px; --radius:16px;
-  }
-  /* تلقائيًا على الشاشات الصغيرة ننتقل لقيم الموبايل */
-  @media (max-width:700px){
-    :root{ --title-w:550px; --desc-w:680px; --url-w:550px; }
+    --primary:#2563eb; --g-blue:#1a0dab; --g-url:#3c4043; --g-desc:#4d5156;
+    --shadow:0 10px 30px rgba(2,8,23,.08); --radius:18px;
   }
   .dark{
-    --bg:#0b1220; --text:#e5e7eb; --muted:#9aa4b2; --card:#0f172a; --border:#1f2a44; --shadow:0 10px 30px rgba(0,0,0,.4);
-    --g-blue:#8ab4f8; --g-url:#bdc1c6; --g-desc:#bdc1c6;
+    --bg:#0b1220; --text:#e5e7eb; --muted:#9aa4b2; --card:#0f172a; --border:#1f2a44;
+    --g-blue:#8ab4f8; --g-url:#bdc1c6; --g-desc:#bdc1c6; --shadow:0 10px 30px rgba(0,0,0,.45);
   }
 
   *{box-sizing:border-box}
   html,body{height:100%}
   html,body{overflow-x:hidden} /* منع أي تمدد أفقي */
-  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 Arial, Helvetica, sans-serif}
-  .wrap{max-width:1100px;margin:28px auto;padding:0 16px 40px}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 Arial, Helvetica, sans-serif}
+  @media (min-width:1200px){ body{font-size:16px} }
 
-  .sr-only{
-    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
-    clip:rect(0,0,0,0);white-space:nowrap;border:0;
-  }
+  .wrap{max-width:1280px;margin:28px auto;padding:0 16px 44px}
+  @media (max-width:480px){ .wrap{padding:0 12px 28px} }
 
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-  .brand{display:flex;align-items:center;gap:12px}
+  /* نص مخفي وصوليًا بدون دفع الصفحة */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  /* ====== الرأس ====== */
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:14px}
   .avatar{
-    width:64px;height:64px;border-radius:50%;
-    object-fit:contain; background:#fff; border:1px solid var(--border); box-shadow:var(--shadow);
+    width:72px;height:72px;border-radius:50%;object-fit:contain;background:#fff;
+    border:1px solid var(--border);box-shadow:var(--shadow)
   }
-  .title{font-size:22px;font-weight:800;letter-spacing:.2px}
+  .tool-name{font-size:22px;font-weight:800;letter-spacing:.2px}
 
+  /* ترتيب خاص للجوال: الصورة في الأعلى بالمنتصف والعنوان تحتها */
+  @media (max-width:700px){
+    header{flex-direction:column;align-items:center;gap:10px}
+    .brand{flex-direction:column;align-items:center;text-align:center}
+    .avatar{width:96px;height:96px}
+    .tool-name{font-size:20px}
+    .header-actions{width:100%;justify-content:center}
+  }
   .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
-
-  .nav-btn{padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
+  .toggle{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
+  .nav-btn{padding:10px 16px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
   .nav-btn.home{background:#000;color:#fff;border-color:#000}
-  .nav-btn:focus{outline:2px solid var(--primary);outline-offset:2px}
+  .nav-btn:focus,.toggle:focus{outline:2px solid var(--primary);outline-offset:2px}
 
-  .row{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
-  @media (max-width:900px){.row{grid-template-columns:1fr}}
+  /* ====== التخطيط الرئيسي ====== */
+  .row{display:grid;grid-template-columns:1.05fr .95fr;gap:22px}
+  @media (max-width:1024px){.row{grid-template-columns:1fr}}
+  .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .card{padding:18px}
+  .preview{padding:20px}
 
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-  .fields .field{margin-bottom:14px}.fields .field:last-child{margin-bottom:0}
-  .label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-weight:600;font-size:13px}
-  input[type="text"],textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff0;color:var(--text);outline:none}
-  textarea{min-height:96px;resize:vertical}
+  /* حقول الإدخال */
+  .fields .field{margin-bottom:16px}
+  .label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-weight:700;font-size:14px}
+  input[type="text"],textarea{
+    width:100%;padding:14px 14px;border:1px solid var(--border);border-radius:14px;background:#fff0;color:var(--text);outline:none
+  }
+  textarea{min-height:112px;resize:vertical}
+  .note{font-size:12px;color:var(--muted)}
   .meters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
-  .meter-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff0;font-weight:600}
-  .state{font-weight:700}.ok{color:#16a34a}.warn{color:#d97706}.bad{color:#dc2626}
-  .note{font-size:11px;color:var(--muted)}
-  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  button{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff0;color:var(--text);cursor:pointer}
+  .meter-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff0;font-weight:700}
+  .state{font-weight:800}.ok{color:#16a34a}.warn{color:#d97706}.bad{color:#dc2626}
+
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  button{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff0;color:var(--text);cursor:pointer}
   button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
   button:focus{outline:2px solid var(--primary);outline-offset:2px}
 
-  /* معاينة */
-  .preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 16px}
-  .serp{display:flex;flex-direction:column;gap:2px}
+  /* ====== بطاقة المعاينة ====== */
+  .serp{display:flex;flex-direction:column;gap:3px}
   .serp .title{
-    font:800 20px/1.3 Arial, Helvetica, sans-serif;
-    color:var(--g-blue);margin:0;max-width:var(--title-w);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* لا يهبط للسطر الثاني */
+    font:800 22px/1.3 Arial, Helvetica, sans-serif;color:var(--g-blue);margin:0;
+    max-width:var(--title-w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis
   }
-  .serp .url{color:var(--g-url);font:normal 13px/1.6 Arial, Helvetica, sans-serif;margin:0 0 2px;max-width:var(--url-w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .serp .url{
+    color:var(--g-url);font:normal 14px/1.7 Arial, Helvetica, sans-serif;margin:0 0 2px;
+    max-width:var(--url-w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
   .serp .desc{color:var(--g-desc);font:normal 15px/1.4 Arial, Helvetica, sans-serif;margin:0;max-width:var(--desc-w);white-space:pre-line}
   .foot-help{margin-top:10px;font-size:12px;color:var(--muted)}
+
+  /* على الشاشات الصغيرة نستخدم حدود العرض الخاصة بالموبايل */
+  @media (max-width:700px){
+    :root{ --title-w:550px; --desc-w:680px; --url-w:550px; }
+    .serp .title{font-size:20px}
+  }
 </style>
 </head>
 <body>
@@ -83,7 +105,7 @@
       <img id="avatar" class="avatar" alt="صورة أنس راشد"
            src="https://i.imgur.com/B3UkEQ0.jpg"
            onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?><svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;128&quot; height=&quot;128&quot; viewBox=&quot;0 0 72 72&quot;><rect width=&quot;72&quot; height=&quot;72&quot; rx=&quot;36&quot; fill=&quot;%23fff&quot; stroke=&quot;%23e5e7eb&quot;/><text x=&quot;50%25&quot; y=&quot;54%25&quot; text-anchor=&quot;middle&quot; font-family=&quot;Arial&quot; font-size=&quot;20&quot; fill=&quot;%239ca3af&quot;>AR</text></svg>'">
-      <div class="title">أداة محاكاة مجانية لنتائج جوجل من أنس راشد</div>
+      <div class="tool-name">أداة محاكاة مجانية لنتائج جوجل من أنس راشد</div>
     </div>
 
     <div class="header-actions" role="group" aria-label="خيارات التنقل">
@@ -94,6 +116,7 @@
   </header>
 
   <div class="row">
+    <!-- ====== النموذج ====== -->
     <section class="card fields" aria-labelledby="formTitle">
       <h2 id="formTitle" class="sr-only">نموذج إدخال النصوص</h2>
 
@@ -106,7 +129,7 @@
           </div>
         </div>
         <input id="titleInput" type="text" aria-label="حقل العنوان"
-               placeholder="مثال: كيفية تحسين محركات البحث لمتجرك الإلكتروني خطوة بخطوة">
+               placeholder="أدخل عنوان صفحتك هنا">
         <div class="note">العدّ يشمل الأحرف والمسافات والرموز. عند بلوغ 61 حرفًا سيظهر القص بنقاط في نفس السطر.</div>
       </div>
 
@@ -119,7 +142,7 @@
           </div>
         </div>
         <textarea id="descInput" aria-label="حقل الوصف"
-                  placeholder="لخّص المحتوى وأبرز الفائدة مع دعوة بسيطة لاتخاذ الإجراء. يظهر سطران كحد أقصى في جوجل."></textarea>
+                  placeholder="اكتب وصفًا جذابًا يظهر في سطرين كحد أقصى."></textarea>
         <div class="note">العدّ يشمل الأحرف والمسافات والرموز. قد يختلف القص الفعلي في جوجل.</div>
       </div>
 
@@ -132,8 +155,8 @@
           </div>
         </div>
         <input id="urlInput" type="text" aria-label="حقل الرابط"
-               placeholder="https://yourdomain.com/كيفية-تحسين-محركات-البحث-لمتجرك-الالكتروني-خطوة-بخطوة">
-        <div class="note">يتم توليد المسار تلقائيًا من العنوان مع الحفاظ على الدومين. العرض LTR ويُقصّ بأناقة.</div>
+               placeholder="https://yourdomain.com/مسار-الصفحة">
+        <div class="note">يُنشئ المسار تلقائيًا من العنوان مع الحفاظ على الدومين. يُعرض LTR ويُقصّ بأناقة.</div>
       </div>
 
       <div class="btns">
@@ -144,22 +167,21 @@
       </div>
     </section>
 
+    <!-- ====== المعاينة ====== -->
     <section class="preview" aria-labelledby="prevTitle">
       <h2 id="prevTitle" class="sr-only">معاينة نتيجة جوجل</h2>
       <div class="serp" id="serp">
-        <h3 class="title" id="pTitle">عنوان الصفحة — قد يتم قصّه إذا تجاوز الحد</h3>
-        <p class="url"><span dir="ltr" id="pUrl">yourdomain.com/مسار/طويل/للغاية/سيتم…</span></p>
-        <p class="desc" id="pDesc">هذا الوصف يظهر كحد أقصى في سطرين. إذا كان أطول فسيتم قصّه وإضافة علامة الحذف…</p>
+        <h3 class="title" id="pTitle">أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد</h3>
+        <p class="url"><span dir="ltr" id="pUrl">yourdomain.com/أداة-محاكاة-مجانية-لنتائج-بحث-جوجل-serp-من-أنس-راشد</span></p>
+        <p class="desc" id="pDesc">أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجر من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.</p>
       </div>
-      <div class="foot-help">
-        • حدود العدّ: العنوان 61 حرف — الوصف 160 حرف. • حدود العرض الحالية: <span id="limitsText">—</span>
-      </div>
+      <div class="foot-help">• حدود العدّ: العنوان 61 حرف — الوصف 160 حرف. • حدود العرض الحالية: <span id="limitsText">—</span></div>
     </section>
   </div>
 </div>
 
 <script>
-/* ===== قياس بالبكسل (دالة عامة) ===== */
+/* ===== قياس بالبكسل (دالة عامة مطلوبة) ===== */
 (function(){
   const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
   function measurePx(text, font){ ctx.font = font; return ctx.measureText(text==null?'':String(text)).width; }
@@ -167,13 +189,14 @@
 })();
 
 const FONTS = {
-  title:'800 20px Arial, Helvetica, sans-serif',
+  title:'800 22px Arial, Helvetica, sans-serif',
   desc :'normal 15px Arial, Helvetica, sans-serif',
-  url  :'normal 13px Arial, Helvetica, sans-serif'
+  url  :'normal 14px Arial, Helvetica, sans-serif'
 };
 const ELLIPSIS='…';
 const TITLE_CHAR_LIMIT = 61;
 
+/* ===== عناصر DOM ===== */
 const $=s=>document.querySelector(s);
 const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
 const pTitle=$('#pTitle'), pUrl=$('#pUrl'), pDesc=$('#pDesc');
@@ -185,22 +208,15 @@ const limitsText=$('#limitsText');
 const copyTitleBtn=$('#copyTitleBtn'), copyDescBtn=$('#copyDescBtn'), copyPreviewBtn=$('#copyPreviewBtn');
 const clearBtn=$('#clearBtn'), backBtn=$('#backBtn'), homeBtn=$('#homeBtn');
 
+/* ===== حالة وتخزين ===== */
 let state={dark:false, title:'', desc:'', url:''};
-const STORAGE_KEY='serp_preview_state_v7';
-let urlAutoMode = true;
+const STORAGE_KEY='serp_preview_state_v8';
+let urlAutoMode = true; // توليد الرابط من العنوان حتى يحرّره المستخدم يدويًا
 
-function cssVarPx(name){
-  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  return parseFloat(v||'0')||0;
-}
-function updateLimitsText(){
-  // استخدم العرض الفعلي للعناصر حتى تكون المحاكاة مثالية على الجوال
-  const tW = Math.min(cssVarPx('--title-w'), pTitle.clientWidth || cssVarPx('--title-w'));
-  const dW = Math.min(cssVarPx('--desc-w'),  pDesc.clientWidth  || cssVarPx('--desc-w'));
-  const uW = Math.min(cssVarPx('--url-w'),   pUrl.clientWidth   || cssVarPx('--url-w'));
-  limitsText.textContent = `Title ${Math.round(tW)}px — Desc ${Math.round(dW)}px × 2 — URL ${Math.round(uW)}px`;
-}
+function saveState(){ state.title=titleInput.value||''; state.desc=descInput.value||''; state.url=urlInput.value||''; try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){} }
+function loadState(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ state=Object.assign(state, JSON.parse(raw)||{}); } }catch(e){} }
 
+/* ===== مساعدين ===== */
 const charCount = s => Array.from(String(s||'')).length;
 
 function truncateByChars(text, limit){
@@ -211,7 +227,24 @@ function truncateByChars(text, limit){
   const base = lastSpace > 0 ? sliced.slice(0, lastSpace) : sliced;
   return base + ELLIPSIS;
 }
-
+function cleanUrlForDisplay(raw){
+  if (!raw) return '';
+  let s=String(raw).trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
+  return s;
+}
+function midTruncateToFit(str, limitPx, font){
+  if (measurePx(str,font)<=limitPx) return str;
+  let start=0,end=str.length-1, out=str;
+  while (start<end){
+    out = str.slice(0,start)+ELLIPSIS+str.slice(end+1);
+    if (measurePx(out,font)<=limitPx) return out;
+    (start <= (str.length-1-end)) ? start++ : end--;
+    if (str.length - (end-start+1) > str.length-3) break;
+  }
+  let base=''; for (let i=0;i<str.length;i++){ const c=base+str[i]; if (measurePx(c+ELLIPSIS,font)<=limitPx) base=c; else break; }
+  return base+ELLIPSIS;
+}
+/* لفّ الوصف لسطرين بالقياس الحقيقي لعرض العنصر */
 function wrapDescriptionTwoLines(text, lineLimitPx, font){
   const tokens = String(text).replace(/\n+/g,' ').split(/(\s+)/);
   let lines=['','']; let iLine=0;
@@ -246,24 +279,7 @@ function wrapDescriptionTwoLines(text, lineLimitPx, font){
   const w0=measurePx(lines[0],font), w1=measurePx(lines[1],font);
   return {lines, totalPx:w0+w1, clipped:false, widths:[w0,w1]};
 }
-
-function cleanUrlForDisplay(raw){
-  if (!raw) return '';
-  let s=String(raw).trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
-  return s;
-}
-function midTruncateToFit(str, limitPx, font){
-  if (measurePx(str,font)<=limitPx) return str;
-  let start=0,end=str.length-1, out=str;
-  while (start<end){
-    out = str.slice(0,start)+ELLIPSIS+str.slice(end+1);
-    if (measurePx(out,font)<=limitPx) return out;
-    (start <= (str.length-1-end)) ? start++ : end--;
-    if (str.length - (end-start+1) > str.length-3) break;
-  }
-  let base=''; for (let i=0;i<str.length;i++){ const c=base+str[i]; if (measurePx(c+ELLIPSIS,font)<=limitPx) base=c; else break; }
-  return base+ELLIPSIS;
-}
+/* توليد مسار من العنوان (يبقي العربية ويستبدل الفراغات بشرطة) */
 function slugFromTitle(t){
   const keep = /[0-9A-Za-z\u0600-\u06FF\- ]/;
   let s = Array.from(t||'').filter(ch=>keep.test(ch)).join('');
@@ -280,63 +296,50 @@ function composeUrl(domainPart, pathPart){
   const d = extractDomain(domainPart);
   return 'https://' + d + (pathPart?'/'+pathPart:'');
 }
-
-/* ===== حالة وتخزين ===== */
-function saveState(){ state.title=titleInput.value||''; state.desc=descInput.value||''; state.url=urlInput.value||''; try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){} }
-function loadState(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ state=Object.assign(state, JSON.parse(raw)||{}); } }catch(e){} }
-
-/* ===== الوضع الداكن ===== */
-function setDark(on){ state.dark=!!on; document.body.classList.toggle('dark', state.dark);
-  darkBtn.setAttribute('aria-pressed', String(state.dark));
-  darkBtn.textContent = state.dark ? 'الوضع الفاتح' : 'الوضع الداكن';
-  saveState();
+/* قياس حدود العرض الفعلية للعناصر كي تكون النتيجة مثالية على الجوال والكمبيوتر */
+function cssVarPx(name){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return parseFloat(v||'0')||0;
 }
-
-/* ===== تقييمات ===== */
-function evalTitleByCount(n){
-  if (n >= TITLE_CHAR_LIMIT) return {text:'طويل', cls:'bad'};
-  if (n < 30)  return {text:'قصير جدًا', cls:'warn'};
-  return {text:'مناسب', cls:'ok'};
-}
-function evalDescByCount(n){
-  if (n >= 160) return {text:'طويل', cls:'bad'};
-  if (n < 80)   return {text:'قصير نسبيًا', cls:'warn'};
-  return {text:'مناسب', cls:'ok'};
+function updateLimitsText(){
+  const tW = Math.min(cssVarPx('--title-w'), pTitle.clientWidth || cssVarPx('--title-w'));
+  const dW = Math.min(cssVarPx('--desc-w'),  pDesc.clientWidth  || cssVarPx('--desc-w'));
+  const uW = Math.min(cssVarPx('--url-w'),   pUrl.clientWidth   || cssVarPx('--url-w'));
+  limitsText.textContent = `Title ${Math.round(tW)}px — Desc ${Math.round(dW)}px × 2 — URL ${Math.round(uW)}px`;
 }
 
 /* ===== العرض ===== */
 function render(){
-  // Title (قصّ بالعدد ومنع السطر الثاني)
+  // العنوان: قصّ بالعدد (61) + منع السطر الثاني
   const titleRaw = (titleInput.value || '').replace(/\s+/g,' ').trimStart();
   const tCount = charCount(titleRaw);
-  const tEval = evalTitleByCount(tCount);
   titleCountEl.textContent = `${tCount} حرف`;
-  titleState.textContent = tEval.text; titleState.className = 'state ' + tEval.cls;
-  const shownTitle = tCount > TITLE_CHAR_LIMIT ? truncateByChars(titleRaw, TITLE_CHAR_LIMIT) : (titleRaw || 'عنوان الصفحة — مثال');
+  titleState.textContent = (tCount>=61)?'طويل':(tCount<30?'قصير جدًا':'مناسب');
+  titleState.className = 'state ' + ((tCount>=61)?'bad':(tCount<30?'warn':'ok'));
+  const shownTitle = tCount > 61 ? truncateByChars(titleRaw, 61) : (titleRaw || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد');
   pTitle.textContent = shownTitle;
 
-  // URL (توليد تلقائي للمسار طالما لم يُعدّل الحقل يدويًا)
+  // الرابط: توليد تلقائي للمسار من العنوان حتى يُعدّل يدويًا
   if (urlAutoMode){
     const dom = extractDomain(urlInput.value || 'yourdomain.com');
-    const slug = slugFromTitle(titleRaw || 'عنوان-افتراضي');
+    const slug = slugFromTitle(titleRaw || 'أداة-محاكاة-مجانية-لنتائج-بحث-جوجل-serp-من-أنس-راشد');
     urlInput.value = composeUrl(dom, slug);
   }
-  const clean = cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug');
   const urlLimit = Math.min(cssVarPx('--url-w'), pUrl.clientWidth || 9999);
-  pUrl.textContent = midTruncateToFit(clean, urlLimit, FONTS.url);
+  pUrl.textContent = midTruncateToFit(cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug'), urlLimit, FONTS.url);
   urlCountEl.textContent = `${charCount(urlInput.value)} حرف`;
   urlState.textContent = '—'; urlState.className='state';
 
-  // Description: اللفّ بسطرين بناءً على عرض العنصر الفعلي
+  // الوصف: لفّ سطرين دقيق بالبكسل حسب عرض العنصر الفعلي
   const descRaw = (descInput.value || '');
   const dCount = charCount(descRaw);
-  const dEval = evalDescByCount(dCount);
   descCountEl.textContent = `${dCount} حرف`;
-  descState.textContent = dEval.text; descState.className='state '+dEval.cls;
+  descState.textContent = (dCount>=160)?'طويل':(dCount<80?'قصير نسبيًا':'مناسب');
+  descState.className = 'state ' + ((dCount>=160)?'bad':(dCount<80?'warn':'ok'));
 
   const descLimit = Math.min(cssVarPx('--desc-w'), pDesc.clientWidth || cssVarPx('--desc-w'));
   const dRes = wrapDescriptionTwoLines(
-    descRaw.trim() || 'هذا الوصف يظهر في سطرين كحد أقصى. إذا طال أكثر فسيتم قصّه تلقائيًا مع إضافة علامة الحذف…',
+    descRaw.trim() || 'أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجر من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.',
     descLimit, FONTS.desc
   );
   pDesc.textContent = (dRes.lines[0] + (dRes.lines[1]? '\n'+dRes.lines[1] : '')).trim();
@@ -359,20 +362,18 @@ const onInput = debounce(()=>{ render(); saveState(); },150);
 /* ===== تهيئة ===== */
 (function init(){
   loadState();
-  if (state.dark) setDark(true);
 
-  // استعادة النصوص أو تعبئة افتراضيًا
+  // قيم افتراضية وفق طلبك
+  const defTitle='أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
+  const defDesc='أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجرك من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.';
   if (state.title || state.desc || state.url){
-    titleInput.value=state.title||'';
-    descInput.value =state.desc ||'';
-    urlInput.value  =state.url  ||'';
+    titleInput.value=state.title||defTitle;
+    descInput.value =state.desc ||defDesc;
+    urlInput.value  =state.url  ||('https://yourdomain.com/'+slugFromTitle(defTitle));
   } else {
-    const defTitle = 'كيفية تحسين محركات البحث لمتجرك الإلكتروني خطوة بخطوة';
-    const defDesc  = 'ابدأ من الأساسيات: سرعة الموقع، قابلية الجوال، وبنية المحتوى. اكتب عناوين واضحة ووصفًا يجيب عن نية البحث لتحقيق زيارات مؤهلة.';
-    const slug = slugFromTitle(defTitle);
-    titleInput.value = defTitle;
-    descInput.value  = defDesc;
-    urlInput.value   = 'https://yourdomain.com/'+slug;
+    titleInput.value=defTitle;
+    descInput.value=defDesc;
+    urlInput.value='https://yourdomain.com/'+slugFromTitle(defTitle);
   }
 
   render();
@@ -386,30 +387,19 @@ const onInput = debounce(()=>{ render(); saveState(); },150);
   window.addEventListener('resize', debounce(()=>{ render(); }, 150));
 
   // الوضع الداكن
-  darkBtn.addEventListener('click', ()=>setDark(!state.dark));
-  darkBtn.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); setDark(!state.dark); }});
+  darkBtn.addEventListener('click', ()=>{ document.body.classList.toggle('dark'); darkBtn.setAttribute('aria-pressed', document.body.classList.contains('dark')); darkBtn.textContent=document.body.classList.contains('dark')?'الوضع الفاتح':'الوضع الداكن'; saveState(); });
 
   // نسخ
   copyTitleBtn.addEventListener('click', ()=>copyText(titleInput.value));
   copyDescBtn .addEventListener('click', ()=>copyText(descInput.value));
-  copyPreviewBtn.addEventListener('click', ()=>{
-    const t=titleInput.value;
-    const u=cleanUrlForDisplay(urlInput.value);
-    const d=descInput.value;
-    copyText([t,u,d].filter(Boolean).join('\n'));
-  });
+  copyPreviewBtn.addEventListener('click', ()=>copyText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n')));
 
   // مسح
-  clearBtn.addEventListener('click', ()=>{
-    titleInput.value=''; descInput.value=''; urlInput.value='';
-    urlAutoMode = true; render(); saveState(); titleInput.focus();
-  });
+  clearBtn.addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; urlAutoMode=true; render(); saveState(); titleInput.focus(); });
 
   // تنقل أعلى الصفحة
   backBtn.addEventListener('click', ()=>{ if(history.length>1) history.back(); });
-  backBtn.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); if(history.length>1) history.back(); }});
   homeBtn.addEventListener('click', ()=>{ window.location.href='https://anasrashed.com'; });
-  homeBtn.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); window.location.href='https://anasrashed.com'; }});
 })();
 </script>
 </body>
