@@ -6,7 +6,7 @@
 <title>أداة محاكاة مجانية لنتائج جوجل من أنس راشد</title>
 <style>
   :root{
-    /* أبعاد محاكاة جوجل (منطقية) */
+    /* قيود العرض المنطقية لمحاكاة جوجل على الشاشات الكبيرة */
     --title-w:600px; --desc-w:920px; --url-w:600px;
 
     /* ألوان وقياسات عامة */
@@ -21,30 +21,30 @@
 
   *{box-sizing:border-box}
   html,body{height:100%}
-  html,body{overflow-x:hidden} /* لا تمدد أفقي نهائيًا */
+  html,body{overflow-x:hidden} /* منع أي تمرير أفقي */
   body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 Arial, Helvetica, sans-serif}
   @media (min-width:1280px){ body{font-size:16px} }
 
-  .wrap{max-width:1280px;margin:28px auto;padding:0 16px 44px}
+  .wrap{max-width:1280px;margin:28px auto;padding:0 16px 44px;width:100%}
   @media (max-width:480px){ .wrap{padding:0 12px 28px} }
 
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-  /* ====== رأس مرن (متوافق تمامًا مع الجوال) ====== */
+  /* ===== رأس متجاوب بالكامل ===== */
   header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:14px}
   .avatar{
     width:72px;height:72px;border-radius:50%;object-fit:contain;background:#fff;
     border:1px solid var(--border);box-shadow:var(--shadow)
   }
-  .tool-name{font-size:26px;font-weight:800;letter-spacing:.2px}
+  .tool-name{font-size:clamp(20px,2.2vw,28px);font-weight:800;letter-spacing:.2px}
 
-  /* نسخة الجوال: الصورة بالأعلى في المنتصف والعنوان تحتها */
+  /* نسخة الجوال: الصورة بالأعلى بالمنتصف والعنوان تحتها */
   @media (max-width:700px){
-    header{flex-direction:column;align-items:center;gap:10px;margin-bottom:8px}
+    header{flex-direction:column;align-items:center;gap:10px;margin-bottom:10px}
     .brand{flex-direction:column;align-items:center;text-align:center}
-    .avatar{width:110px;height:110px}
-    .tool-name{font-size:22px;max-width:95vw}
+    .avatar{width:92px;height:92px}
+    .tool-name{font-size:20px;max-width:92vw}
     .header-actions{width:100%;justify-content:center}
   }
 
@@ -54,19 +54,19 @@
   .nav-btn.home{background:#000;color:#fff;border-color:#000}
   .nav-btn:focus,.toggle:focus{outline:2px solid var(--primary);outline-offset:2px}
 
-  /* ====== التخطيط العام ====== */
+  /* ===== التخطيط العام ===== */
   .row{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:start}
-  @media (max-width:1024px){.row{grid-template-columns:1fr;gap:16px}}
+  @media (max-width:1024px){.row{grid-template-columns:1fr;gap:14px}}
 
   .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
-  .card{padding:18px}
-  .preview{padding:20px}
+  .card{padding:18px;width:100%}
+  .preview{padding:20px;width:100%}
 
   /* الحقول */
   .fields .field{margin-bottom:16px}
   .label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-weight:700;font-size:14px}
   input[type="text"],textarea{
-    width:100%;padding:14px 14px;border:1px solid var(--border);border-radius:14px;background:#fff0;color:var(--text);outline:none
+    width:100%;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff0;color:var(--text);outline:none;max-width:100%
   }
   textarea{min-height:112px;resize:vertical}
   .note{font-size:12px;color:var(--muted)}
@@ -79,27 +79,29 @@
   button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
   button:focus{outline:2px solid var(--primary);outline-offset:2px}
 
-  /* ====== بطاقة المعاينة ====== */
-  .serp{display:flex;flex-direction:column;gap:3px}
+  /* ===== بطاقة المعاينة ===== */
+  .serp{display:flex;flex-direction:column;gap:3px;max-width:100%}
   .serp .title{
-    font:800 22px/1.3 Arial, Helvetica, sans-serif;color:var(--g-blue);margin:0;
-    /* لا نزول للسطر الثاني + لا تمدد خارج الشاشة */
-    max-width:min(var(--title-w), 100%); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font:800 clamp(18px,2.2vw,22px)/1.3 Arial, Helvetica, sans-serif;color:var(--g-blue);margin:0;
+    width:100%; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* سطر واحد فقط */
   }
   .serp .url{
     color:var(--g-url);font:normal 14px/1.7 Arial, Helvetica, sans-serif;margin:0 0 2px;
-    max-width:min(var(--url-w), 100%); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    width:100%; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .serp .desc{
     color:var(--g-desc);font:normal 15px/1.4 Arial, Helvetica, sans-serif;margin:0;
-    max-width:min(var(--desc-w), 100%); white-space:pre-line;
+    width:100%; max-width:100%; white-space:pre-line;
   }
   .foot-help{margin-top:10px;font-size:12px;color:var(--muted)}
 
-  /* ضبط القيم على الجوال تلقائيًا */
+  /* على الشاشات الصغيرة: اضبط حدود القياس لتساوي عرض البطاقة تقريبًا */
   @media (max-width:700px){
-    :root{ --title-w:550px; --desc-w:680px; --url-w:550px; }
-    .serp .title{font-size:20px}
+    /* 100vw ناقص حواشي الحاوية (≈24px) وحواشي البطاقة (≈24px) */
+    :root{ --title-w:calc(100vw - 48px); --desc-w:calc(100vw - 48px); --url-w:calc(100vw - 48px); }
+    .card{padding:14px} .preview{padding:14px}
+    .note{font-size:11px}
+    .nav-btn,.toggle{padding:9px 12px}
   }
 </style>
 </head>
@@ -121,7 +123,7 @@
   </header>
 
   <div class="row">
-    <!-- ====== النموذج ====== -->
+    <!-- ===== نموذج الإدخال ===== -->
     <section class="card fields" aria-labelledby="formTitle">
       <h2 id="formTitle" class="sr-only">نموذج إدخال النصوص</h2>
 
@@ -172,7 +174,7 @@
       </div>
     </section>
 
-    <!-- ====== المعاينة ====== -->
+    <!-- ===== بطاقة المعاينة ===== -->
     <section class="preview" aria-labelledby="prevTitle">
       <h2 id="prevTitle" class="sr-only">معاينة نتيجة جوجل</h2>
       <div class="serp" id="serp">
@@ -186,7 +188,7 @@
 </div>
 
 <script>
-/* ===== قياس بالبكسل (دالة عامة مطلوبة) ===== */
+/* === قياس بالبكسل عبر Canvas (دالة عامة) === */
 (function(){
   const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
   function measurePx(text, font){ ctx.font = font; return ctx.measureText(text==null?'':String(text)).width; }
@@ -201,7 +203,6 @@ const FONTS = {
 const ELLIPSIS='…';
 const TITLE_CHAR_LIMIT = 61;
 
-/* ===== عناصر DOM ===== */
 const $=s=>document.querySelector(s);
 const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
 const pTitle=$('#pTitle'), pUrl=$('#pUrl'), pDesc=$('#pDesc');
@@ -213,29 +214,22 @@ const limitsText=$('#limitsText');
 const copyTitleBtn=$('#copyTitleBtn'), copyDescBtn=$('#copyDescBtn'), copyPreviewBtn=$('#copyPreviewBtn');
 const clearBtn=$('#clearBtn'), backBtn=$('#backBtn'), homeBtn=$('#homeBtn');
 
-/* ===== حالة وتخزين ===== */
 let state={dark:false, title:'', desc:'', url:''};
-const STORAGE_KEY='serp_preview_state_r1';
-let urlAutoMode = true; // توليد الرابط من العنوان حتى يحرّره المستخدم يدويًا
+const STORAGE_KEY='serp_preview_state_r2';
+let urlAutoMode = true;
 
-function saveState(){ state.title=titleInput.value||''; state.desc=descInput.value||''; state.url=urlInput.value||''; try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){} }
-function loadState(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ state=Object.assign(state, JSON.parse(raw)||{}); } }catch(e){} }
-
-/* ===== مساعدين ===== */
+/* === أدوات مساعدة === */
 const charCount = s => Array.from(String(s||'')).length;
-
 function truncateByChars(text, limit){
   const arr = Array.from(text || '');
   if (arr.length <= limit) return text || '';
-  const sliced = arr.slice(0, limit).join('');
-  const lastSpace = sliced.lastIndexOf(' ');
+  const sliced = arr.slice(0, limit).join(''), lastSpace = sliced.lastIndexOf(' ');
   const base = lastSpace > 0 ? sliced.slice(0, lastSpace) : sliced;
   return base + ELLIPSIS;
 }
 function cleanUrlForDisplay(raw){
   if (!raw) return '';
-  let s=String(raw).trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
-  return s;
+  return String(raw).trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
 }
 function midTruncateToFit(str, limitPx, font){
   if (measurePx(str,font)<=limitPx) return str;
@@ -244,12 +238,11 @@ function midTruncateToFit(str, limitPx, font){
     out = str.slice(0,start)+ELLIPSIS+str.slice(end+1);
     if (measurePx(out,font)<=limitPx) return out;
     (start <= (str.length-1-end)) ? start++ : end--;
-    if (str.length - (end-start+1) > str.length-3) break;
   }
   let base=''; for (let i=0;i<str.length;i++){ const c=base+str[i]; if (measurePx(c+ELLIPSIS,font)<=limitPx) base=c; else break; }
   return base+ELLIPSIS;
 }
-/* لفّ الوصف لسطرين باستخدام عرض العنصر الحقيقي */
+/* التفاف الوصف لسطرين */
 function wrapDescriptionTwoLines(text, lineLimitPx, font){
   const tokens = String(text).replace(/\n+/g,' ').split(/(\s+)/);
   let lines=['','']; let iLine=0;
@@ -284,7 +277,7 @@ function wrapDescriptionTwoLines(text, lineLimitPx, font){
   const w0=measurePx(lines[0],font), w1=measurePx(lines[1],font);
   return {lines, totalPx:w0+w1, clipped:false, widths:[w0,w1]};
 }
-/* توليد مسار من العنوان (يبقي العربية ويستبدل الفراغات بشرطة) */
+/* مسار من العنوان */
 function slugFromTitle(t){
   const keep = /[0-9A-Za-z\u0600-\u06FF\- ]/;
   let s = Array.from(t||'').filter(ch=>keep.test(ch)).join('');
@@ -301,7 +294,7 @@ function composeUrl(domainPart, pathPart){
   const d = extractDomain(domainPart);
   return 'https://' + d + (pathPart?'/'+pathPart:'');
 }
-/* قياس حدود العرض الفعلية للعناصر كي تكون مثالية على الجوال والكمبيوتر */
+/* قياس حدود العرض الفعلية للعناصر */
 function cssVarPx(name){
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return parseFloat(v||'0')||0;
@@ -313,46 +306,45 @@ function updateLimitsText(){
   limitsText.textContent = `Title ${Math.round(tW)}px — Desc ${Math.round(dW)}px × 2 — URL ${Math.round(uW)}px`;
 }
 
-/* ===== العرض ===== */
+/* === العرض === */
 function render(){
-  // العنوان: قصّ بالعدد (61) + منع السطر الثاني
+  // العنوان
   const titleRaw = (titleInput.value || '').replace(/\s+/g,' ').trimStart();
   const tCount = charCount(titleRaw);
   titleCountEl.textContent = `${tCount} حرف`;
   titleState.textContent = (tCount>=TITLE_CHAR_LIMIT)?'طويل':(tCount<30?'قصير جدًا':'مناسب');
   titleState.className = 'state ' + ((tCount>=TITLE_CHAR_LIMIT)?'bad':(tCount<30?'warn':'ok'));
-  const shownTitle = tCount > TITLE_CHAR_LIMIT ? truncateByChars(titleRaw, TITLE_CHAR_LIMIT) : (titleRaw || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد');
-  pTitle.textContent = shownTitle;
+  pTitle.textContent = tCount > TITLE_CHAR_LIMIT ? truncateByChars(titleRaw, TITLE_CHAR_LIMIT) : (titleRaw || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد');
 
-  // الرابط: توليد تلقائي للمسار من العنوان حتى يُعدّل يدويًا
+  // الرابط
   if (urlAutoMode){
     const dom = extractDomain(urlInput.value || 'yourdomain.com');
     const slug = slugFromTitle(titleRaw || 'أداة-محاكاة-مجانية-لنتائج-بحث-جوجل-serp-من-أنس-راشد');
     urlInput.value = composeUrl(dom, slug);
   }
-  const urlLimit = Math.min(cssVarPx('--url-w'), pUrl.clientWidth || 9999);
-  pUrl.textContent = midTruncateToFit(cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug'), urlLimit, 'normal 14px Arial, Helvetica, sans-serif');
+  const urlLimit = Math.max(80, pUrl.clientWidth || cssVarPx('--url-w')); // لا يقل عن 80px
+  pUrl.textContent = midTruncateToFit(cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug'), urlLimit, FONTS.url);
   urlCountEl.textContent = `${charCount(urlInput.value)} حرف`;
   urlState.textContent = '—'; urlState.className='state';
 
-  // الوصف: لفّ سطرين دقيق حسب عرض العنصر الفعلي
+  // الوصف
   const descRaw = (descInput.value || '');
   const dCount = charCount(descRaw);
   descCountEl.textContent = `${dCount} حرف`;
   descState.textContent = (dCount>=160)?'طويل':(dCount<80?'قصير نسبيًا':'مناسب');
   descState.className = 'state ' + ((dCount>=160)?'bad':(dCount<80?'warn':'ok'));
 
-  const descLimit = Math.min(cssVarPx('--desc-w'), pDesc.clientWidth || cssVarPx('--desc-w'));
+  const descLimit = Math.max(120, pDesc.clientWidth || cssVarPx('--desc-w'));
   const dRes = wrapDescriptionTwoLines(
     descRaw.trim() || 'أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجر من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.',
-    descLimit, 'normal 15px Arial, Helvetica, sans-serif'
+    descLimit, FONTS.desc
   );
   pDesc.textContent = (dRes.lines[0] + (dRes.lines[1]? '\n'+dRes.lines[1] : '')).trim();
 
   updateLimitsText();
 }
 
-/* ===== نسخ ===== */
+/* === نسخ === */
 async function copyText(s){
   try{
     if (navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(s); }
@@ -360,17 +352,19 @@ async function copyText(s){
   }catch(e){}
 }
 
-/* ===== Debounce ===== */
+/* === Debounce === */
 function debounce(fn,ms=150){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms);} }
 const onInput = debounce(()=>{ render(); saveState(); },150);
 
-/* ===== تهيئة ===== */
+/* === تهيئة === */
 (function init(){
-  loadState();
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw) state=Object.assign(state, JSON.parse(raw)||{});
+  }catch(e){}
 
-  // القيم الافتراضية (حسب طلبك)
   const defTitle='أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
-  const defDesc='أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجر من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.';
+  const defDesc='أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجرك من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.';
   if (state.title || state.desc || state.url){
     titleInput.value=state.title||defTitle;
     descInput.value =state.desc ||defDesc;
@@ -397,7 +391,7 @@ const onInput = debounce(()=>{ render(); saveState(); },150);
     const on=document.body.classList.contains('dark');
     darkBtn.setAttribute('aria-pressed', on);
     darkBtn.textContent = on ? 'الوضع الفاتح' : 'الوضع الداكن';
-    saveState();
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.assign(state,{dark:on}))); }catch(e){}
   });
 
   // نسخ
@@ -406,7 +400,7 @@ const onInput = debounce(()=>{ render(); saveState(); },150);
   copyPreviewBtn.addEventListener('click', ()=>copyText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n')));
 
   // مسح
-  clearBtn.addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; urlAutoMode=true; render(); saveState(); titleInput.focus(); });
+  clearBtn.addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; urlAutoMode=true; render(); try{localStorage.setItem(STORAGE_KEY, JSON.stringify({}));}catch(e){}; titleInput.focus(); });
 
   // تنقل أعلى الصفحة
   backBtn.addEventListener('click', ()=>{ if(history.length>1) history.back(); });
