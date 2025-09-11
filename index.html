@@ -218,15 +218,17 @@
 </div>
 
 <script>
-/* ========== تفعيل الذكاء الاصطناعي عبر الوِركر ========== */
+
 const AI_CONFIG = {
   enabled: true,
-  // كان: "https://serp.anasrashed.com"
-  baseUrl: "https://seo-generate.anasshopify88.workers.dev", // ← رابط الوِركر الحقيقي
+  // حط رابط الوركر الحقيقي هنا (workers.dev)
+  baseUrl: "https://seo-generate.anasshopify88.workers.dev",
   apiKey: "",
-  provider: "openai",
-  model: "gpt-4o-mini",
+  provider: "cf",                 // اختياري
+  model: "@cf/meta/llama-3.1-8b-instruct"  // اختياري، الوركر سيضبطه تلقائيًا لو نسيته
 };
+
+
 
 
 /* === قياس بالبكسل عبر Canvas === */
