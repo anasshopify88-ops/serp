@@ -3,11 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>أداة محاكاة نتائج جوجل (مجانية 100% — تعمل محليًا)</title>
-
-<!-- WebLLM (تشغيل النموذج داخل المتصفح) -->
-<script src="https://unpkg.com/@mlc-ai/web-llm@0.2.78/dist/index.min.js"></script>
-
+<title>أداة محاكاة مجانية لنتائج جوجل من أنس راشد</title>
 <style>
   :root{
     --bg:#f6f8fb; --text:#0f172a; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
@@ -15,269 +11,312 @@
     --shadow:0 10px 30px rgba(2,8,23,.08); --radius:18px;
     --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
   }
+  .dark{ --bg:#0b1220; --text:#e5e7eb; --muted:#9aa4b2; --card:#0f172a; --border:#1f2a44; --g-blue:#8ab4f8; --g-url:#bdc1c6; --g-desc:#bdc1c6; --shadow:0 10px 30px rgba(0,0,0,.45); }
+  *{box-sizing:border-box}
+  html,body{height:100%; overflow-x:hidden; width:100%; max-width:100%; -webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 Arial, Helvetica, sans-serif}
-  .wrap{max-width:1100px;margin:24px auto;padding:0 12px 40px}
-  .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow)}
+  @media (min-width:1280px){ body{font-size:16px} }
+  .wrap{max-width:1200px;margin:24px auto;padding:0 12px 40px;width:100%}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow)}
+  .tool-name{font-weight:800;font-size:clamp(18px,2.2vw,28px);line-height:1.2;white-space:nowrap}
+  .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .toggle,.nav-btn{padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
+  .nav-btn.home{background:#000;color:#fff;border-color:#000}
+
+  .row{display:grid; gap:20px; align-items:start; grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr); grid-template-areas: "ai preview" "fields preview";}
+  @media (max-width:1024px){ .row{grid-template-columns:1fr;grid-template-areas:"ai" "fields" "preview";gap:14px} }
+
+  .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
   .card{padding:16px}
-  .preview{padding:16px;position:sticky;top:16px}
-  .row{display:grid;gap:20px;grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr)}
-  @media (max-width:1024px){ .row{grid-template-columns:1fr} }
+  .preview{padding:16px; position:sticky; top:16px; align-self:start}
 
-  textarea{width:100%;min-height:160px;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff0}
-  input[type=text]{width:100%;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff0}
-  .btn{padding:12px 14px;border-radius:12px;border:1px solid var(--border);cursor:pointer;background:#fff0}
-  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-  .btn.loading{opacity:.7;pointer-events:none}
+  .ai-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .ai-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .hint{font-size:12px;color:var(--muted)}
+  .status{font-size:12px;margin-top:8px;display:flex;align-items:center;gap:8px}
+  .status.ok{color:var(--ok)} .status.warn{color:var(--warn)} .status.bad{color:var(--bad)} .status.hidden{display:none}
+  .err{margin-top:8px;font-size:12px;color:var(--bad)}
+
+  textarea#rawInput{width:100%;max-width:100%;min-height:160px;max-height:48vh;resize:vertical;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff0;color:var(--text)}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .chip{padding:8px 12px;border:1px solid var(--border);border-radius:999px;font-size:12px}
-  .status{font-size:12px;margin-top:8px}
-  .status.ok{color:var(--ok)} .status.warn{color:var(--warn)} .status.bad{color:var(--bad)} .hidden{display:none}
+  .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#fff0;font-size:12px}
 
-  .label{display:flex;align-items:center;justify-content:space-between;margin:8px 0;font-weight:700}
-  .meters{display:flex;gap:8px;align-items:center}
-  .meter{font-size:12px;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
-  .state{font-size:12px;font-weight:800}
-  .state.ok{color:var(--ok)} .state.warn{color:var(--warn)} .state.bad{color:var(--bad)}
+  .fields .field{margin-bottom:14px}
+  .label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-weight:700;font-size:14px}
+  input[type="text"], textarea:not(#rawInput){width:100%;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff0;color:var(--text)}
+  textarea:not(#rawInput){min-height:110px;max-height:40vh;resize:vertical}
+  .note{font-size:12px;color:var(--muted)}
+  .meters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .meter-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff0;font-weight:700}
+  .state{font-weight:800}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  button{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff0;color:var(--text);cursor:pointer}
+  button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  button.loading{opacity:.7;pointer-events:none}
 
-  .serp{display:flex;flex-direction:column;gap:3px}
-  .serp .title{font:800 clamp(18px,2.2vw,22px)/1.3 Arial;color:var(--g-blue);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .serp .url{color:var(--g-url);font:14px/1.7 Arial;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .serp .desc{color:var(--g-desc);font:15px/1.4 Arial;margin:0;white-space:pre-line}
+  .serp{display:flex;flex-direction:column;gap:3px;width:100%; overflow-wrap:anywhere;word-break:break-word}
+  .serp .title{font:800 clamp(18px,2.2vw,22px)/1.3 Arial, Helvetica, sans-serif;color:var(--g-blue);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .serp .url{color:var(--g-url);font:normal 14px/1.7 Arial, Helvetica, sans-serif;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .serp .desc{color:var(--g-desc);font:normal 15px/1.4 Arial, Helvetica, sans-serif;margin:0;white-space:pre-line}
+  .foot-help{margin-top:10px;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1 style="margin:0 0 10px">أداة محاكاة نتائج جوجل — تعمل محليًا 100%</h1>
-  <div class="status warn" id="gpuNote">سيتم تحميل النموذج للتشغيل على جهازك (مرة واحدة). لا توجد اتصالات خارجية.</div>
+<div class="wrap" id="app">
+  <header>
+    <div class="brand">
+      <img id="avatar" class="avatar" alt="صورة أنس راشد" src="https://i.imgur.com/B3UkEQ0.jpg">
+      <div class="tool-name">أداة محاكاة مجانية لنتائج جوجل من أنس راشد</div>
+    </div>
+    <div class="header-actions" role="group" aria-label="خيارات التنقل">
+      <button id="backBtn" class="nav-btn" title="رجوع">رجوع</button>
+      <button id="homeBtn" class="nav-btn home" title="الرئيسية">الرئيسية</button>
+      <button id="darkBtn" class="toggle" aria-pressed="false" aria-label="تبديل الوضع الداكن">الوضع الداكن</button>
+    </div>
+  </header>
 
   <div class="row">
-    <!-- AI -->
-    <section class="card">
-      <h2 style="margin:0 0 8px;font-size:16px">إنشاء العنوان والوصف والرابط تلقائيًا</h2>
-      <textarea id="raw" placeholder="الصق وصف المنتج/الخدمة/المقال (حتى 12000 حرف)"></textarea>
-      <div class="chips">
-        <span class="chip" id="winfo">0 كلمة</span>
-        <span class="chip">نموذج: <span id="modelName">Phi-3.5-mini-instruct (WebLLM)</span></span>
+    <section class="card" id="sec-ai">
+      <div class="ai-head">
+        <h2 style="margin:0;font-size:16px">إنشاء العنوان والوصف والرابط تلقائيًا</h2>
+        <div class="ai-actions">
+          <button id="generateBtn" class="primary">توليد</button>
+          <button id="clearAllBtn">مسح الكل</button>
+        </div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:10px">
-        <button class="btn primary" id="genBtn">توليد</button>
-        <button class="btn" id="trimBtn">قصّ الحدود</button>
-        <button class="btn" id="clearBtn">مسح</button>
+      <p class="hint">الصق وصف المنتج/الخدمة/المقال (حتى 12000 حرف). لا يوجد توليد محلي — API فقط.</p>
+      <textarea id="rawInput" placeholder="الصق وصفًا تفصيليًا هنا..."></textarea>
+      <div class="chips">
+        <span class="chip" id="wordInfo">0 كلمة</span>
+        <span class="chip" id="aiMode">وضع: API</span>
       </div>
       <div id="status" class="status hidden"></div>
+      <div id="aiErr" class="err" hidden></div>
     </section>
 
-    <!-- Fields -->
-    <section class="card">
-      <div class="label">
-        <label for="title">العنوان (≤ 60)</label>
-        <div class="meters">
-          <span class="meter" id="titleCount">0</span>
-          <span class="state" id="titleState">—</span>
+    <section class="card fields" id="sec-fields">
+      <div class="field">
+        <div class="label">
+          <label for="titleInput">العنوان (Title)</label>
+          <div class="meters">
+            <span class="meter-pill" id="titleCount">0 حرف</span>
+            <span class="state" id="titleState">—</span>
+            <button id="btnTrimTitle" class="nav-btn" style="padding:6px 10px">قص ≤60</button>
+          </div>
         </div>
+        <input id="titleInput" type="text" placeholder="≤ 60 حرف">
       </div>
-      <input type="text" id="title" placeholder="العنوان">
 
-      <div class="label" style="margin-top:14px">
-        <label for="meta">وصف الميتا (≤ 160)</label>
-        <div class="meters">
-          <span class="meter" id="metaCount">0</span>
-          <span class="state" id="metaState">—</span>
+      <div class="field">
+        <div class="label">
+          <label for="descInput">الوصف (Meta)</label>
+          <div class="meters">
+            <span class="meter-pill" id="descCount">0 حرف</span>
+            <span class="state" id="descState">—</span>
+            <button id="btnClampDesc" class="nav-btn" style="padding:6px 10px">قص ≤160</button>
+          </div>
         </div>
+        <textarea id="descInput" placeholder="≤ 160 حرف"></textarea>
       </div>
-      <textarea id="meta" placeholder="الوصف"></textarea>
 
-      <div class="label" style="margin-top:14px">
-        <label for="url">الرابط</label>
-        <div class="meters"><span class="meter" id="urlCount">0</span></div>
+      <div class="field">
+        <div class="label">
+          <label for="urlInput">الرابط (URL)</label>
+          <div class="meters">
+            <span class="meter-pill" id="urlCount">0 حرف</span>
+            <span class="state" id="urlState">—</span>
+          </div>
+        </div>
+        <input id="urlInput" type="text" placeholder="https://yourdomain.com/مسار-الصفحة">
       </div>
-      <input type="text" id="url" placeholder="https://yourdomain.com/مسار-الصفحة">
+
+      <div class="btns">
+        <button class="primary" id="copyTitleBtn">نسخ العنوان</button>
+        <button class="primary" id="copyDescBtn">نسخ الوصف</button>
+        <button class="primary" id="copyPreviewBtn">نسخ المعاينة كنص</button>
+        <button id="clearBtn">مسح الحقول</button>
+      </div>
     </section>
 
-    <!-- Preview -->
-    <section class="preview">
-      <div class="serp">
-        <h3 class="title" id="pTitle">عنوان تجريبي لنتيجة البحث</h3>
-        <p class="url"><span dir="ltr" id="pUrl">yourdomain.com/مسار-تجريبي</span></p>
-        <p class="desc" id="pDesc">وصف ميتا تجريبي يظهر على سطرين بحد أقصى، مع قصّ ذكي للحروف.</p>
+    <section class="preview" id="sec-preview">
+      <div class="serp" id="serp">
+        <h3 class="title" id="pTitle">أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد</h3>
+        <p class="url"><span dir="ltr" id="pUrl">yourdomain.com/أداة-محاكاة-نتائج-بحث</span></p>
+        <p class="desc" id="pDesc">وصف تجريبي.</p>
       </div>
+      <div class="foot-help">• العنوان ≤ 60 — الوصف ≤ 160.</div>
     </section>
   </div>
 </div>
 
 <script>
-/* ===== قياس عرض نص للمعاينة ===== */
-(function(){ const c=document.createElement('canvas'),x=c.getContext('2d'); window.measurePx=(t,f)=>{x.font=f; return x.measureText(t==null?'':String(t)).width};})();
-const FONTS = { title:'800 22px Arial, Helvetica, sans-serif', desc:'normal 15px Arial, Helvetica, sans-serif', url:'normal 14px Arial, Helvetica, sans-serif' };
+const API_BASE = "https://seo-generate.anasshopify88.workers.dev";
+const ENDPOINTS = { gen: API_BASE + "/api/generate", ping: API_BASE + "/ping", diag: API_BASE + "/diag" };
+
+(function(){ const c=document.createElement('canvas'),x=c.getContext('2d'); window.measurePx=(t,f)=>{x.font=f; return x.measureText(t==null?'':String(t)).width}; })();
+const FONTS = { title:'800 22px Arial, Helvetica, sans-serif', desc :'normal 15px Arial, Helvetica, sans-serif', url  :'normal 14px Arial, Helvetica, sans-serif' };
 const ELLIPSIS='…', TITLE_MAX=60, META_MAX=160;
 const $=s=>document.querySelector(s);
 
-/* ===== حالات/عدادات ===== */
-const raw=$('#raw'), genBtn=$('#genBtn'), trimBtn=$('#trimBtn'), clearBtn=$('#clearBtn'), statusEl=$('#status');
-const title=$('#title'), meta=$('#meta'), url=$('#url');
-const pTitle=$('#pTitle'), pDesc=$('#pDesc'), pUrl=$('#pUrl');
-const titleCount=$('#titleCount'), metaCount=$('#metaCount'), urlCount=$('#urlCount');
-const titleState=$('#titleState'), metaState=$('#metaState'); const winfo=$('#winfo');
+const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
+const pTitle=$('#pTitle'), pUrl=$('#pUrl'), pDesc=$('#pDesc'), serp=$('#serp');
+const statusEl=$('#status'), aiErr=$('#aiErr');
+const titleCountEl=$('#titleCount'), titleState=$('#titleState');
+const descCountEl=$('#descCount'), descState=$('#descState');
+const urlCountEl=$('#urlCount'), urlState=$('#urlState');
+const rawInput=$('#rawInput'), generateBtn=$('#generateBtn'), clearAllBtn=$('#clearAllBtn');
+const btnTrimTitle=$('#btnTrimTitle'), btnClampDesc=$('#btnClampDesc');
+const copyTitleBtn=$('#copyTitleBtn'), copyDescBtn=$('#copyDescBtn'), copyPreviewBtn=$('#copyPreviewBtn');
 
-/* ===== أدوات نصية ===== */
-const charCount = s => Array.from(String(s||'')).length;
-const clean = s => String(s||'').replace(/\s+/g,' ').trim();
-const stripEmoji = s => String(s||'').replace(/[\p{Extended_Pictographic}\u{1F3FB}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'');
-function truncateSmart(text, limit){
-  const arr=Array.from(text||''); if (arr.length<=limit) return text||'';
-  const sliced=arr.slice(0,limit).join(''); const cut=sliced.lastIndexOf(' ');
-  return (cut>0?sliced.slice(0,cut):sliced) + ELLIPSIS;
-}
-function enforceTitle(t){
-  let out=clean(stripEmoji(t||'')); if(!out) out='عنوان مناسب للصفحة';
-  if (charCount(out)>TITLE_MAX) out=truncateSmart(out, TITLE_MAX); return out;
-}
-function enforceMeta(m){
-  let out=clean(stripEmoji(m||'')); if(!out) out='وصف موجز جذاب يوضح الفائدة الرئيسية ويشجع على النقر.';
-  if (charCount(out)>META_MAX) out=truncateSmart(out, META_MAX); return out;
-}
-function slugFromTitle(t){
-  let s = Array.from(String(t||'')).filter(ch=>/[\u0600-\u06FFA-Za-z0-9 \-]/.test(ch)).join('');
-  s = s.replace(/\s+/g,'-').replace(/\-+/g,'-').replace(/^\-|\-$/g,'').toLowerCase();
-  return s || 'صفحة-جديدة';
-}
-function extractDomain(raw){
-  if(!raw) return 'yourdomain.com';
-  let s=raw.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,''); s=s.split('/')[0].replace(/\/+$/,'');
-  return s||'yourdomain.com';
-}
-function render(){
-  const tRaw = clean(title.value);
-  const mRaw = clean(meta.value);
-  const uRaw = clean(url.value);
-
-  titleCount.textContent = charCount(tRaw);
-  titleState.textContent = charCount(tRaw)>60?'طويل':(charCount(tRaw)<30?'قصير':'مناسب');
-  titleState.className = 'state ' + (charCount(tRaw)>60?'bad':(charCount(tRaw)<30?'warn':'ok'));
-
-  metaCount.textContent = charCount(mRaw);
-  metaState.textContent = charCount(mRaw)>160?'طويل':(charCount(mRaw)<80?'قصير':'مناسب');
-  metaState.className = 'state ' + (charCount(mRaw)>160?'bad':(charCount(mRaw)<80?'warn':'ok'));
-
-  urlCount.textContent = charCount(uRaw);
-
-  // معاينة
-  const tDisp = charCount(tRaw)>TITLE_MAX ? truncateSmart(tRaw,TITLE_MAX) : tRaw;
-  pTitle.textContent = tDisp || 'عنوان تجريبي لنتيجة البحث';
-
-  const linePx = pDesc.getBoundingClientRect().width || 500;
-  const tokens = String(mRaw).replace(/\n+/g,' ').split(/(\s+)/);
-  let lines=['','']; let i=0;
-  const fits=(curr,tok)=>measurePx(curr+tok,FONTS.desc)<=linePx;
-  for (const tok of tokens){
-    if (fits(lines[i],tok)){ lines[i]+=tok; }
-    else { i++; if(i>1){ let second=lines[1].trimEnd(); while(second && measurePx(second+ELLIPSIS,FONTS.desc)>linePx){ second=second.replace(/\s*\S+$/,''); } lines[1]=second+(second?ELLIPSIS:''); break; }
-           else { if (measurePx(tok,FONTS.desc)<=linePx){ lines[i]=tok.replace(/^\s+/,''); }
-                  else { let piece=''; for(let j=0;j<tok.length;j++){ const c=piece+tok[j]; if (measurePx(c,FONTS.desc)<=linePx) piece=c; else break; } lines[i]=piece; } } }
-  }
-  pDesc.textContent = (lines[0]+(lines[1]?'\n'+lines[1]: '')).trim();
-
-  const niceUrl = (uRaw||('https://'+extractDomain(uRaw)+'/'+slugFromTitle(tDisp||'صفحة-جديدة')))
-                  .replace(/^https?:\/\//,'').replace(/^www\./,'');
-  pUrl.textContent = niceUrl;
-}
-
-/* ===== تحميل وتشغيل WebLLM محليًا ===== */
-let engine = null;
-const MODEL = "Phi-3.5-mini-instruct-q4f16_1-MLC"; // صغير وسريع نسبيًا
-document.getElementById('modelName').textContent = "Phi-3.5-mini-instruct";
-
-async function ensureEngine(){
-  if (engine) return engine;
-  setStatus('warn','جاري تهيئة النموذج المحلي... قد يستغرق أول تشغيل دقيقة (سيُخزن في الكاش).');
-  engine = await webllm.CreateWebWorkerMLCEngine(
-    MODEL,
-    {
-      initProgressCallback: (p) => {
-        if (p.text) setStatus('warn', 'تحميل: ' + p.text);
-      },
-      // يُستخدم WebGPU تلقائيًا إن توفر، وإلا يسقط على WASM/CPU
-    }
-  );
-  setStatus('ok','جاهز للتوليد محليًا.');
-  return engine;
-}
-
-function setStatus(kind,msg){
+function setStatus(kind, msg){
   statusEl.className = 'status ' + (kind||'') + (msg?'':' hidden');
   statusEl.textContent = msg||'';
 }
 
-/* ===== التوليد ===== */
-function buildPrompt(userText){
-  return [
-    { role:"system", content:
-`أنت خبير سيو عربي محترف. أعد JSON فقط بالمفاتيح: { "title": "", "meta": "", "slug": "" }.
-القيود:
-- "title": ≤ 60 حرف، عربي واضح بلا إيموجي/زخرفة/تكرار، يركز على الفائدة.
-- "meta": ≤ 160 حرف، جذاب مختصر لا يكرر العنوان حرفياً.
-- "slug": مشتق من العنوان، أحرف عربية/لاتينية وأرقام وواصلة (-) فقط.
-أعد JSON فقط بلا أي نص إضافي.` },
-    { role:"user", content: "الوصف:\n" + userText + "\nأعد JSON فقط." }
-  ];
+const charCount = s => Array.from(String(s||'')).length;
+const normalizeWS = s => String(s||'').replace(/\s+/g,' ').trim();
+const cleanUrlForDisplay = raw => (raw||'').trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
+const extractDomain = raw => { if(!raw) return 'yourdomain.com'; let s=raw.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,''); s=s.split('/')[0].replace(/\/+$/,''); return s||'yourdomain.com'; };
+const slugFromTitle = t => { let s=Array.from(String(t||"")).filter(ch=>/[\u0600-\u06FFA-Za-z0-9 \-]/.test(ch)).join(''); s=s.replace(/\s+/g,'-').replace(/\-+/g,'-').replace(/^\-|\-$/g,'').toLowerCase(); return s||'صفحة-جديدة'; };
+const availableWidth = el => Math.max(60, Math.floor(el.getBoundingClientRect().width));
+function truncateByChars(text, limit){ const arr=Array.from(text||''); if(arr.length<=limit) return text||''; const sliced=arr.slice(0,limit).join(''); const lastSpace=sliced.lastIndexOf(' '); const base=lastSpace>0?sliced.slice(0,lastSpace):sliced; return base+ELLIPSIS; }
+function midTruncateToFit(str, limitPx, font){
+  if (measurePx(str,font)<=limitPx) return str;
+  let start=0,end=str.length-1,out=str;
+  while (start<end){ out=str.slice(0,start)+ELLIPSIS+str.slice(end+1); if (measurePx(out,font)<=limitPx) return out; (start <= (str.length-1-end))?start++:end--; }
+  let base=''; for (let i=0;i<str.length;i++){ const c=base+str[i]; if (measurePx(c+ELLIPSIS,font)<=limitPx) base=c; else break; }
+  return base+ELLIPSIS;
+}
+function render(){
+  const titleRaw = normalizeWS(titleInput.value).trimStart();
+  const enforcedTitle = (charCount(titleRaw) > TITLE_MAX) ? truncateByChars(titleRaw, TITLE_MAX) : titleRaw;
+  titleCountEl.textContent = `${charCount(titleRaw)} حرف`;
+  titleState.textContent = (charCount(titleRaw)>60)?'طويل':(charCount(titleRaw)<30?'قصير':'مناسب');
+  titleState.className = 'state ' + ((charCount(titleRaw)>60)?'bad':(charCount(titleRaw)<30?'warn':'ok'));
+  pTitle.textContent = enforcedTitle || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
+
+  const dom = extractDomain(urlInput.value || 'yourdomain.com');
+  urlInput.value = 'https://' + dom + '/' + slugFromTitle(enforcedTitle || 'أداة-محاكاة-نتائج-بحث');
+  const urlLimit = availableWidth(pUrl.parentElement);
+  pUrl.textContent = midTruncateToFit(cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug'), urlLimit, FONTS.url);
+  urlCountEl.textContent = `${charCount(urlInput.value)} حرف`; urlState.textContent='—'; urlState.className='state';
+
+  const dRaw = descInput.value || '';
+  descCountEl.textContent = `${charCount(dRaw)} حرف`;
+  descState.textContent = (charCount(dRaw)>160)?'طويل':(charCount(dRaw)<80?'قصير':'مناسب');
+  descState.className = 'state ' + ((charCount(dRaw)>160)?'bad':(charCount(dRaw)<80?'warn':'ok'));
+
+  const linePx = availableWidth(pDesc);
+  const tokens = String(dRaw).replace(/\n+/g,' ').split(/(\s+)/);
+  let lines=['','']; let iLine=0;
+  const fits=(curr,tok)=>measurePx(curr+tok, FONTS.desc)<=linePx;
+  for (const tok of tokens){
+    if (fits(lines[iLine], tok)){ lines[iLine]+=tok; }
+    else { iLine++; if (iLine>1){ let second = lines[1].trimEnd(); while (second && measurePx(second+ELLIPSIS,FONTS.desc)>linePx){ second = second.replace(/\s*\S+$/,''); } lines[1]=second+(second?ELLIPSIS:''); break; } else { if (measurePx(tok,FONTS.desc)<=linePx){ lines[iLine]=tok.replace(/^\s+/,''); } else { let piece=''; for (let j=0;j<tok.length;j++){ const c=piece+tok[j]; if (measurePx(c,FONTS.desc)<=linePx) piece=c; else break; } lines[iLine]=piece; } } }
+  }
+  pDesc.textContent = (lines[0] + (lines[1]? '\n'+lines[1] : '')).trim();
 }
 
-function tryParseJSONBlock(s){
-  try { return JSON.parse(s); } catch {}
-  const m = typeof s==="string" && s.match(/\{[\s\S]*\}/);
-  if (m){ try { return JSON.parse(m[0]); } catch {} }
-  return null;
-}
-
-async function generate(){
-  const txt = clean(raw.value);
-  if (!txt){ setStatus('bad','الصق وصفًا واضحًا أولاً.'); return; }
-
-  genBtn.classList.add('loading'); genBtn.textContent='... جاري التوليد';
-  setStatus('warn','توليد محلي قيد التنفيذ...');
+async function aiGenerate(raw){
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 25000);
+  let respText = "";
   try{
-    await ensureEngine();
-    const res = await engine.chat.completions.create({
-      messages: buildPrompt(txt),
-      temperature: 0.2,
-      stream: false
+    const resp = await fetch(ENDPOINTS.gen, {
+      method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({ model:'gpt-4o-mini', text: raw, temperature: 0.2 }),
+      mode:'cors', cache:'no-store', signal: controller.signal
     });
-    const content = res?.choices?.[0]?.message?.content || "";
-    let out = tryParseJSONBlock(content) || {};
-    // تنظيف وحدود صارمة
-    const t = enforceTitle(out.title||'');
-    let m  = enforceMeta(out.meta||'');
-    if (clean(m) === clean(t)) m = enforceMeta(m + ' — تفاصيل موجزة إضافية.');
-    const domain = extractDomain(url.value || 'yourdomain.com');
-    const s = slugFromTitle(t);
-    title.value = t; meta.value = m; url.value = 'https://' + domain + '/' + s;
-    setStatus('ok','تم التوليد محليًا (بدون أي API).');
+    clearTimeout(timeout);
+    respText = await resp.text();
+    if (!resp.ok) throw new Error(respText || `HTTP ${resp.status}`);
+    return JSON.parse(respText);
+  }catch(err){ clearTimeout(timeout); throw err; }
+}
+
+function showErrorMessage(eText){
+  aiErr.hidden = false;
+  aiErr.textContent = eText;
+}
+function clearError(){ aiErr.hidden = true; aiErr.textContent = ""; }
+
+async function generateFromRaw(){
+  clearError(); setStatus('', ''); // اخفِ الحالة أولاً
+  let raw = rawInput.value || '';
+  if (charCount(raw) > 12000) raw = Array.from(raw).slice(0,12000).join('');
+
+  generateBtn.classList.add('loading'); generateBtn.textContent='... جاري التوليد';
+  try{
+    const out = await aiGenerate(raw);
+    titleInput.value = (charCount(out.title)>TITLE_MAX) ? truncateByChars(out.title, TITLE_MAX) : out.title;
+    descInput.value  = (charCount(out.meta) >META_MAX ) ? truncateByChars(out.meta , META_MAX ) : out.meta;
+    // slug يُبنى من العنوان محليًا للعرض فقط (الخادم أصلاً يعيده كذلك)
+    const dom = extractDomain(urlInput.value || 'yourdomain.com');
+    urlInput.value   = 'https://' + dom + '/' + slugFromTitle(titleInput.value);
+
+    // حالة نجاح مع ذكر المزوّد (openai أو cloudflare)
+    setStatus('ok', out.provider === 'cloudflare'
+      ? 'تم التوليد بنجاح عبر Cloudflare AI (Fallback).'
+      : 'تم التوليد بنجاح عبر OpenAI.');
     render();
-  }catch(e){
-    setStatus('bad','فشل التوليد المحلي: ' + String(e).slice(0,200));
+  }catch(err){
+    // أخفِ أي نجاح سابق ثم اعرض سبب الفشل بوضوح
+    setStatus('bad', 'فشل الاتصال بالـAPI.');
+    let msg = String(err||'');
+    // لو رجع JSON خطأ من الخادم
+    try{
+      const parsed = JSON.parse(msg);
+      if (parsed && parsed.error && parsed.providerStatus === 429) {
+        msg = 'نفد رصيد OpenAI (429). إن كان Cloudflare AI مضبوطًا سيُستخدم تلقائيًا. تحقق من الفوترة أو فعّل البديل.';
+      } else if (parsed && parsed.error && parsed.hint) {
+        msg = parsed.hint;
+      }
+    }catch(_){}
+    showErrorMessage('فشل التوليد: ' + msg);
   }finally{
-    genBtn.classList.remove('loading'); genBtn.textContent='توليد';
+    generateBtn.classList.remove('loading'); generateBtn.textContent='توليد';
   }
 }
 
-/* ===== أحداث واجهة ===== */
-function updateWordCount(){ const wc=(raw.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length; winfo.textContent=`${wc} كلمة`; }
-raw.addEventListener('input', ()=>{ updateWordCount(); });
-title.addEventListener('input', render); meta.addEventListener('input', render); url.addEventListener('input', render);
+/* ========= تهيئة ========= */
+(function init(){
+  titleInput.value='أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
+  descInput.value='أنا أنس راشد مختص تحسين محركات البحث؛ أداة لكتابة عنوان ووصف ورابط مثالي يظهر بشكل احترافي في نتائج البحث.';
+  urlInput.value='https://yourdomain.com/' + slugFromTitle(titleInput.value);
 
-trimBtn.addEventListener('click', ()=>{
-  if (charCount(title.value)>TITLE_MAX) title.value = truncateSmart(title.value, TITLE_MAX);
-  if (charCount(meta.value)>META_MAX)   meta.value  = truncateSmart(meta.value, META_MAX);
-  // حدّث السُّلَج من العنوان
-  const domain = extractDomain(url.value || 'yourdomain.com');
-  url.value = 'https://' + domain + '/' + slugFromTitle(title.value);
   render();
-});
-clearBtn.addEventListener('click', ()=>{ raw.value=''; title.value=''; meta.value=''; url.value=''; updateWordCount(); render(); });
-genBtn.addEventListener('click', generate);
+  rawInput.addEventListener('input', ()=>{ const wc=(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length; $('#wordInfo').textContent=`${wc} كلمة`; });
+  titleInput.addEventListener('input', render);
+  descInput .addEventListener('input', render);
+  urlInput  .addEventListener('input', render);
+  btnTrimTitle.addEventListener('click', ()=>{ if (charCount(titleInput.value)>TITLE_MAX) titleInput.value = truncateByChars(titleInput.value, TITLE_MAX); render(); });
+  btnClampDesc.addEventListener('click', ()=>{ if (charCount(descInput.value)>META_MAX) descInput.value = truncateByChars(descInput.value, META_MAX); render(); });
+  $('#clearBtn').addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; render(); });
+  clearAllBtn.addEventListener('click', ()=>{ rawInput.value=''; $('#wordInfo').textContent='0 كلمة'; });
+  $('#copyTitleBtn').addEventListener('click', ()=>navigator.clipboard.writeText(titleInput.value));
+  $('#copyDescBtn') .addEventListener('click', ()=>navigator.clipboard.writeText(descInput.value));
+  $('#copyPreviewBtn').addEventListener('click', ()=>navigator.clipboard.writeText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n')));
+  $('#backBtn').addEventListener('click', ()=>history.back());
+  $('#homeBtn').addEventListener('click', ()=>location.href='/');
 
-/* بداية */
-updateWordCount(); render();
+  $('#darkBtn').addEventListener('click', ()=>{
+    document.body.classList.toggle('dark');
+    const on=document.body.classList.contains('dark');
+    $('#darkBtn').setAttribute('aria-pressed', on);
+    $('#darkBtn').textContent = on ? 'الوضع الفاتح' : 'الوضع الداكن';
+  });
+
+  $('#generateBtn').addEventListener('click', ()=>{
+    if (!rawInput.value.trim()){
+      rawInput.value = [titleInput.value, descInput.value].join('\n');
+      $('#wordInfo').textContent=`${(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length} كلمة`;
+    }
+    generateFromRaw();
+  });
+})();
 </script>
 </body>
 </html>
