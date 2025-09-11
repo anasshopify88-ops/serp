@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>أداة محاكاة مجانية لنتائج جوجل من أنس راشد</title>
 <style>
   :root{
@@ -17,9 +17,11 @@
 
   *{box-sizing:border-box}
   html,body{height:100%}
-  html,body{overflow-x:hidden} /* لا تمرير أفقي إطلاقًا */
+  html,body{overflow-x:hidden; width:100%; max-width:100%; -webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 Arial, Helvetica, sans-serif}
   @media (min-width:1280px){ body{font-size:16px} }
+
+  img{max-width:100%; height:auto}
 
   .wrap{max-width:1200px;margin:24px auto;padding:0 12px 40px;width:100%}
   @media (max-width:480px){ .wrap{padding:0 10px 28px} }
@@ -41,7 +43,7 @@
     .brand{flex-direction:column;align-items:center;text-align:center}
     .avatar{width:104px;height:104px}
     .tool-name{font-size:22px;max-width:92vw}
-    .header-actions{width:100%;justify-content:center}
+    .header-actions{width:100%;justify-content:center;min-width:0}
   }
 
   .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -53,8 +55,10 @@
   /* ===== التخطيط العام ===== */
   .row{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
   @media (max-width:1024px){.row{grid-template-columns:1fr;gap:14px}}
+  /* مهم: امنع تمدد العناصر خارج عرض الشاشة على الجوال */
+  .row > * { min-width:0 }
 
-  .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);width:100%}
+  .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);width:100%;max-width:100%}
   .card{padding:16px}
   .preview{padding:16px}
 
@@ -75,10 +79,11 @@
   button:focus{outline:2px solid var(--primary);outline-offset:2px}
 
   /* ===== بطاقة المعاينة (عرض مرن 100%) ===== */
-  .serp{display:flex;flex-direction:column;gap:3px;width:100%}
+  .serp{display:flex;flex-direction:column;gap:3px;width:100%;
+        overflow-wrap:anywhere;word-break:break-word} /* مهم للجوال */
   .serp .title{
     font:800 clamp(18px,2.2vw,22px)/1.3 Arial, Helvetica, sans-serif;color:var(--g-blue);margin:0;
-    width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; /* سطر واحد دائمًا */
+    width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .serp .url{
     color:var(--g-url);font:normal 14px/1.7 Arial, Helvetica, sans-serif;margin:0 0 2px;
@@ -90,7 +95,11 @@
   }
   .foot-help{margin-top:10px;font-size:12px;color:var(--muted)}
 
-  /* هوامش أصغر على الشاشات الصغيرة حتى يظهر الصندوق كاملًا بلا قص */
+  /* هوامش وضبط أصغر على الشاشات الصغيرة */
+  @media (max-width:700px){
+    /* منع تكبير iOS عند التركيز على الحقول */
+    input[type="text"], textarea, button{font-size:16px}
+  }
   @media (max-width:480px){
     .card,.preview{padding:14px;border-radius:14px}
     .note{font-size:11px}
@@ -235,7 +244,7 @@ function midTruncateToFit(str, limitPx, font){
   let base=''; for (let i=0;i<str.length;i++){ const c=base+str[i]; if (measurePx(c+ELLIPSIS,font)<=limitPx) base=c; else break; }
   return base+ELLIPSIS;
 }
-/* لفّ الوصف لسطرين باستخدام عرض العنصر نفسه (لا يعتمد على قيم ثابتة) */
+/* لفّ الوصف لسطرين */
 function wrapDescriptionTwoLines(text, lineLimitPx, font){
   const tokens = String(text).replace(/\n+/g,' ').split(/(\s+)/);
   let lines=['','']; let iLine=0;
@@ -283,7 +292,6 @@ function composeUrl(domainPart, pathPart){
   return 'https://' + d + (pathPart?'/'+pathPart:'');
 }
 function availableWidth(el){
-  // أعرض العرض الداخلي الفعلي للعنصر (بدون تمرير أفقي)
   const r = el.getBoundingClientRect();
   return Math.max(60, Math.floor(r.width));
 }
@@ -293,7 +301,6 @@ function updateLimitsText(){
 
 /* ========= العرض ========= */
 function render(){
-  // العنوان بالعدد
   const titleRaw = (titleInput.value || '').replace(/\s+/g,' ').trimStart();
   const tCount = charCount(titleRaw);
   titleCountEl.textContent = `${tCount} حرف`;
@@ -301,18 +308,18 @@ function render(){
   titleState.className = 'state ' + ((tCount>=TITLE_CHAR_LIMIT)?'bad':(tCount<30?'warn':'ok'));
   pTitle.textContent = tCount > TITLE_CHAR_LIMIT ? truncateByChars(titleRaw, TITLE_CHAR_LIMIT) : (titleRaw || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد');
 
-  // الرابط (يعتمد على عرض العنصر نفسه)
+  // الرابط
   if (urlAutoMode){
     const dom = extractDomain(urlInput.value || 'yourdomain.com');
     const slug = slugFromTitle(titleRaw || 'أداة-محاكاة-مجانية-لنتائج-بحث-جوجل-serp-من-أنس-راشد');
     urlInput.value = composeUrl(dom, slug);
   }
-  const urlLimit = availableWidth(pUrl.parentElement); // <p> الحاوية
+  const urlLimit = availableWidth(pUrl.parentElement);
   pUrl.textContent = midTruncateToFit(cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug'), urlLimit, FONTS.url);
   urlCountEl.textContent = `${charCount(urlInput.value)} حرف`;
   urlState.textContent = '—'; urlState.className='state';
 
-  // الوصف (سطران كحد أقصى) بعرض العنصر
+  // الوصف
   const descRaw = (descInput.value || '');
   const dCount = charCount(descRaw);
   descCountEl.textContent = `${dCount} حرف`;
@@ -373,8 +380,13 @@ function loadState(){
   descInput .addEventListener('input', onInput);
   urlInput  .addEventListener('input', ()=>{ urlAutoMode = false; onInput(); });
 
-  // إعادة الحساب عند تغيير الحجم/تدوير الجوال (يحل أي قص للصندوق)
+  // إعادة الحساب عند تغيير الحجم/الدوران
   window.addEventListener('resize', debounce(()=>{ render(); }, 150));
+  window.addEventListener('orientationchange', ()=>{ setTimeout(render, 150); });
+
+  // مراقبة تغيّر أبعاد عناصر المعاينة بدقة (حل نهائي لمشاكل القص)
+  const ro = new ResizeObserver(()=>render());
+  [serp, pUrl.parentElement, pDesc].forEach(el=> ro.observe(el));
 
   // الوضع الداكن
   darkBtn.addEventListener('click', ()=>{
