@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أداة محاكاة مجانية لنتائج جوجل من أنس راشد</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --text:#0f172a; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
+    --primary:#2563eb; --shadow:0 10px 30px rgba(2,8,23,.08);
+    --g-blue:#1a0dab; --g-url:#3c4043; --g-desc:#4d5156;
+    --title-w:600px; --desc-w:920px; --url-w:600px; --radius:16px;
+  }
+  .dark{
+    --bg:#0b1220; --text:#e5e7eb; --muted:#9aa4b2; --card:#0f172a; --border:#1f2a44; --shadow:0 10px 30px rgba(0,0,0,.4);
+    --g-blue:#8ab4f8; --g-url:#bdc1c6; --g-desc:#bdc1c6;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  /* منع أي تمدد أفقي */
+  html,body{overflow-x:hidden}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 Arial, Helvetica, sans-serif}
+  .wrap{max-width:1100px;margin:28px auto;padding:0 16px 40px}
+
+  /* إخفاء بصري دون دفع المحتوى خارج الشاشة */
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .avatar{
+    width:64px;height:64px;border-radius:50%;
+    object-fit:contain; /* تُظهِر الصورة كاملة دون قص */
+    background:#fff; border:1px solid var(--border); box-shadow:var(--shadow);
+  }
+  .title{font-size:22px;font-weight:800;letter-spacing:.2px}
+
+  .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .segmented{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+  .segmented input{position:absolute;opacity:0;pointer-events:none}
+  .segmented label{padding:8px 14px;cursor:pointer;user-select:none;min-width:110px;text-align:center;color:var(--muted)}
+  .segmented input:checked + label{background:var(--primary);color:#fff}
+  .toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
+
+  .nav-btn{padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
+  .nav-btn.home{background:#000;color:#fff;border-color:#000}
+  .nav-btn:focus{outline:2px solid var(--primary);outline-offset:2px}
+
+  .row{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  @media (max-width:900px){.row{grid-template-columns:1fr}}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+  .fields .field{margin-bottom:14px}.fields .field:last-child{margin-bottom:0}
+  .label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-weight:600;font-size:13px}
+  input[type="text"],textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff0;color:var(--text);outline:none}
+  textarea{min-height:96px;resize:vertical}
+  .meters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .meter-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff0;font-weight:600}
+  .state{font-weight:700}.ok{color:#16a34a}.warn{color:#d97706}.bad{color:#dc2626}
+  .note{font-size:11px;color:var(--muted)}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  button{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff0;color:var(--text);cursor:pointer}
+  button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  button:focus{outline:2px solid var(--primary);outline-offset:2px}
+
+  /* معاينة (بطاقة) */
+  .preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 16px}
+  .serp{display:flex;flex-direction:column;gap:2px}
+  .serp .title{
+    font:800 20px/1.3 Arial, Helvetica, sans-serif;
+    color:var(--g-blue);margin:0;max-width:var(--title-w);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .serp .url{color:var(--g-url);font:normal 13px/1.6 Arial, Helvetica, sans-serif;margin:0 0 2px;max-width:var(--url-w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .serp .desc{color:var(--g-desc);font:normal 15px/1.4 Arial, Helvetica, sans-serif;margin:0;max-width:var(--desc-w);white-space:pre-line}
+  .foot-help{margin-top:10px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="brand">
+      <img id="avatar" class="avatar" alt="صورة أنس راشد"
+           src="https://i.imgur.com/B3UkEQ0.jpg"
+           onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?><svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;128&quot; height=&quot;128&quot; viewBox=&quot;0 0 72 72&quot;><rect width=&quot;72&quot; height=&quot;72&quot; rx=&quot;36&quot; fill=&quot;%23fff&quot; stroke=&quot;%23e5e7eb&quot;/><text x=&quot;50%25&quot; y=&quot;54%25&quot; text-anchor=&quot;middle&quot; font-family=&quot;Arial&quot; font-size=&quot;20&quot; fill=&quot;%239ca3af&quot;>AR</text></svg>'">
+      <div class="title">أداة محاكاة مجانية لنتائج جوجل من أنس راشد</div>
+    </div>
+
+    <div class="header-actions" role="group" aria-label="خيارات العرض والتنقل">
+      <button id="backBtn" class="nav-btn" title="رجوع">رجوع</button>
+      <button id="homeBtn" class="nav-btn home" title="الرئيسية">الرئيسية</button>
+
+      <div class="segmented" role="tablist" aria-label="تبديل وضع العرض">
+        <input id="modeDesktop" type="radio" name="mode" value="desktop" checked>
+        <label id="modeDesktopLabel" for="modeDesktop" role="tab" tabindex="0">الكمبيوتر</label>
+        <input id="modeMobile" type="radio" name="mode" value="mobile">
+        <label id="modeMobileLabel" for="modeMobile" role="tab" tabindex="-1">الجوال</label>
+      </div>
+
+      <button id="darkBtn" class="toggle" aria-pressed="false" aria-label="تبديل الوضع الداكن">الوضع الداكن</button>
+    </div>
+  </header>
+
+  <div class="row">
+    <section class="card fields" aria-labelledby="formTitle">
+      <h2 id="formTitle" class="sr-only">نموذج إدخال النصوص</h2>
+
+      <div class="field">
+        <div class="label">
+          <label for="titleInput">العنوان (Title)</label>
+          <div class="meters">
+            <span class="meter-pill" id="titleCount" aria-live="polite">0 حرف</span>
+            <span class="state" id="titleState">—</span>
+          </div>
+        </div>
+        <input id="titleInput" type="text" aria-label="حقل العنوان"
+               placeholder="مثال: كيفية تحسين محركات البحث لمتجرك الإلكتروني خطوة بخطوة">
+        <div class="note">العدّ يشمل الأحرف والمسافات والرموز. عند بلوغ 61 حرفًا سيظهر القص بنقاط في نفس السطر.</div>
+      </div>
+
+      <div class="field">
+        <div class="label">
+          <label for="descInput">الوصف (Meta description)</label>
+          <div class="meters">
+            <span class="meter-pill" id="descCount" aria-live="polite">0 حرف</span>
+            <span class="state" id="descState">—</span>
+          </div>
+        </div>
+        <textarea id="descInput" aria-label="حقل الوصف"
+                  placeholder="لخّص المحتوى وأبرز الفائدة مع دعوة بسيطة لاتخاذ الإجراء. يظهر سطران كحد أقصى في جوجل."></textarea>
+        <div class="note">العدّ يشمل الأحرف والمسافات والرموز. قد يختلف القص الفعلي في جوجل.</div>
+      </div>
+
+      <div class="field">
+        <div class="label">
+          <label for="urlInput">الرابط (URL)</label>
+          <div class="meters">
+            <span class="meter-pill" id="urlCount" aria-live="polite">0 حرف</span>
+            <span class="state" id="urlState">—</span>
+          </div>
+        </div>
+        <input id="urlInput" type="text" aria-label="حقل الرابط"
+               placeholder="https://yourdomain.com/كيفية-تحسين-محركات-البحث-لمتجرك-الالكتروني-خطوة-بخطوة">
+        <div class="note">يتم توليد المسار تلقائيًا من العنوان مع الحفاظ على الدومين. العرض LTR ويُقصّ بأناقة.</div>
+      </div>
+
+      <div class="btns">
+        <button class="primary" id="copyTitleBtn" title="نسخ العنوان">نسخ العنوان</button>
+        <button class="primary" id="copyDescBtn" title="نسخ الوصف">نسخ الوصف</button>
+        <button class="primary" id="copyPreviewBtn" title="نسخ المعاينة كنص">نسخ المعاينة كنص</button>
+        <button id="clearBtn" title="مسح">مسح</button>
+      </div>
+    </section>
+
+    <section class="preview" aria-labelledby="prevTitle">
+      <h2 id="prevTitle" class="sr-only">معاينة نتيجة جوجل</h2>
+      <div class="serp" id="serp">
+        <h3 class="title" id="pTitle">عنوان الصفحة — قد يتم قصّه إذا تجاوز الحد</h3>
+        <p class="url"><span dir="ltr" id="pUrl">yourdomain.com/مسار/طويل/للغاية/سيتم…</span></p>
+        <p class="desc" id="pDesc">هذا الوصف يظهر كحد أقصى في سطرين. إذا كان أطول فسيتم قصّه وإضافة علامة الحذف…</p>
+      </div>
+      <div class="foot-help">
+        • حدود العدّ: العنوان 61 حرف — الوصف 160 حرف. • حدود العرض النمطية للمعاينة: <span id="limitsText">Title 600px — Desc 920px × 2 — URL 600px</span>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* === قياس عرض النص بالبكسل عبر Canvas (دالة عامة مطلوبة) === */
+(function(){
+  const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+  function measurePx(text, font){ ctx.font = font; return ctx.measureText(text==null?'':String(text)).width; }
+  window.measurePx = measurePx;
+})();
+
+/* === إعدادات العرض === */
+const MODES = {
+  desktop:{ titleW:600, descW:920, urlW:600 },
+  mobile :{ titleW:550, descW:680, urlW:550 }
+};
+const FONTS = {
+  title:'800 20px Arial, Helvetica, sans-serif',
+  desc :'normal 15px Arial, Helvetica, sans-serif',
+  url  :'normal 13px Arial, Helvetica, sans-serif'
+};
+const ELLIPSIS='…';
+const TITLE_CHAR_LIMIT = 61;
+
+/* === أدوات مساعدة === */
+const $=s=>document.querySelector(s);
+const charCount = s => Array.from(String(s||'')).length;
+
+function truncateByChars(text, limit){
+  const arr = Array.from(text || '');
+  if (arr.length <= limit) return text || '';
+  const sliced = arr.slice(0, limit).join('');
+  const lastSpace = sliced.lastIndexOf(' ');
+  const base = lastSpace > 0 ? sliced.slice(0, lastSpace) : sliced;
+  return base + ELLIPSIS;
+}
+
+function wrapDescriptionTwoLines(text, lineLimitPx, font){
+  const tokens = String(text).replace(/\n+/g,' ').split(/(\s+)/);
+  let lines=['','']; let iLine=0;
+  const fits=(curr,tok)=>measurePx(curr+tok, font)<=lineLimitPx;
+
+  for (let i=0;i<tokens.length;i++){
+    const tok=tokens[i];
+    if (fits(lines[iLine], tok)){ lines[iLine]+=tok; }
+    else {
+      iLine++;
+      if (iLine>1){
+        let second = lines[1].trimEnd();
+        if (!second){
+          let piece=''; for (let j=0;j<tok.length;j++){ const c=piece+tok[j]; if (measurePx(c+ELLIPSIS,font)<=lineLimitPx) piece=c; else break; }
+          second=piece;
+        } else {
+          while (second && measurePx(second+ELLIPSIS,font)>lineLimitPx){ second = second.replace(/\s*\S+$/,''); }
+          if (!second){
+            let piece=''; for (let j=0;j<lines[1].length;j++){ const c=piece+lines[1][j]; if (measurePx(c+ELLIPSIS,font)<=lineLimitPx) piece=c; else break; }
+            second=piece;
+          }
+        }
+        const final2 = second + (second?ELLIPSIS:'');
+        const w0=measurePx(lines[0],font), w1=measurePx(final2,font);
+        return {lines:[lines[0],final2], totalPx:w0+w1, clipped:true, widths:[w0,w1]};
+      } else {
+        if (measurePx(tok,font)<=lineLimitPx){ lines[iLine]=tok.replace(/^\s+/,''); }
+        else { let piece=''; for (let j=0;j<tok.length;j++){ const c=piece+tok[j]; if (measurePx(c,font)<=lineLimitPx) piece=c; else break; } lines[iLine]=piece; }
+      }
+    }
+  }
+  const w0=measurePx(lines[0],font), w1=measurePx(lines[1],font);
+  return {lines, totalPx:w0+w1, clipped:false, widths:[w0,w1]};
+}
+
+function cleanUrlForDisplay(raw){
+  if (!raw) return '';
+  let s=String(raw).trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
+  return s;
+}
+function midTruncateToFit(str, limitPx, font){
+  if (measurePx(str,font)<=limitPx) return str;
+  let start=0,end=str.length-1, out=str;
+  while (start<end){
+    out = str.slice(0,start)+ELLIPSIS+str.slice(end+1);
+    if (measurePx(out,font)<=limitPx) return out;
+    (start <= (str.length-1-end)) ? start++ : end--;
+    if (str.length - (end-start+1) > str.length-3) break;
+  }
+  let base=''; for (let i=0;i<str.length;i++){ const c=base+str[i]; if (measurePx(c+ELLIPSIS,font)<=limitPx) base=c; else break; }
+  return base+ELLIPSIS;
+}
+function slugFromTitle(t){
+  const keep = /[0-9A-Za-z\u0600-\u06FF\- ]/;
+  let s = Array.from(t||'').filter(ch=>keep.test(ch)).join('');
+  s = s.replace(/\s+/g,'-').replace(/\-+/g,'-').replace(/^\-|\-$/g,'');
+  return s.toLowerCase();
+}
+function composeUrl(domainPart, pathPart){
+  let d = (domainPart||'').trim();
+  if (!d) d = 'yourdomain.com';
+  d = d.replace(/^https?:\/\//i,'').replace(/\/+$/,'');
+  return 'https://' + d + (pathPart?'/'+pathPart:'');
+}
+
+/* === DOM === */
+const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
+const pTitle=$('#pTitle'), pUrl=$('#pUrl'), pDesc=$('#pDesc');
+const modeDesktop=$('#modeDesktop'), modeMobile=$('#modeMobile');
+const modeDesktopLabel=$('#modeDesktopLabel'), modeMobileLabel=$('#modeMobileLabel');
+const darkBtn=$('#darkBtn');
+const titleCountEl=$('#titleCount'), titleState=$('#titleState');
+const descCountEl=$('#descCount'), descState=$('#descState');
+const urlCountEl=$('#urlCount'), urlState=$('#urlState');
+const limitsText=$('#limitsText');
+const copyTitleBtn=$('#copyTitleBtn'), copyDescBtn=$('#copyDescBtn'), copyPreviewBtn=$('#copyPreviewBtn');
+const clearBtn=$('#clearBtn'), backBtn=$('#backBtn'), homeBtn=$('#homeBtn');
+
+/* === حالة وتخزين === */
+let state={mode:'desktop', dark:false, title:'', desc:'', url:''};
+const STORAGE_KEY='serp_preview_state_v6';
+let urlAutoMode = true;
+
+function saveState(){ state.title=titleInput.value||''; state.desc=descInput.value||''; state.url=urlInput.value||''; try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){} }
+function loadState(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ state=Object.assign(state, JSON.parse(raw)||{}); } }catch(e){} }
+
+/* === تبديل الوضع === */
+function applyModeVars(){
+  const m = state.mode==='desktop'? MODES.desktop : MODES.mobile;
+  document.documentElement.style.setProperty('--title-w', m.titleW+'px');
+  document.documentElement.style.setProperty('--desc-w',  m.descW +'px');
+  document.documentElement.style.setProperty('--url-w',   m.urlW  +'px');
+  limitsText.textContent = `Title ${m.titleW}px — Desc ${m.descW}px × 2 — URL ${m.urlW}px`;
+}
+function setMode(mode){
+  state.mode=mode; modeDesktop.checked=mode==='desktop'; modeMobile.checked=mode==='mobile';
+  modeDesktopLabel.setAttribute('tabindex', mode==='desktop'?'0':'-1');
+  modeMobileLabel .setAttribute('tabindex', mode==='mobile' ?'0':'-1');
+  applyModeVars(); render(); saveState();
+}
+
+/* === الوضع الداكن === */
+function setDark(on){ state.dark=!!on; document.body.classList.toggle('dark', state.dark);
+  darkBtn.setAttribute('aria-pressed', String(state.dark));
+  darkBtn.textContent = state.dark ? 'الوضع الفاتح' : 'الوضع الداكن';
+  saveState();
+}
+
+/* === تقييمات بالعدد === */
+function evalTitleByCount(n){
+  if (n >= TITLE_CHAR_LIMIT) return {text:'طويل', cls:'bad'};
+  if (n < 30)  return {text:'قصير جدًا', cls:'warn'};
+  return {text:'مناسب', cls:'ok'};
+}
+function evalDescByCount(n){
+  if (n >= 160) return {text:'طويل', cls:'bad'};
+  if (n < 80)   return {text:'قصير نسبيًا', cls:'warn'};
+  return {text:'مناسب', cls:'ok'};
+}
+
+/* === العرض === */
+function render(){
+  const m = state.mode==='desktop'? MODES.desktop : MODES.mobile;
+
+  // Title: قصّ بالعدد + منع السطر الثاني
+  const titleRaw = (titleInput.value || '').replace(/\s+/g,' ').trimStart();
+  const tCount = charCount(titleRaw);
+  const tEval = evalTitleByCount(tCount);
+  titleCountEl.textContent = `${tCount} حرف`;
+  titleState.textContent = tEval.text; titleState.className = 'state ' + tEval.cls;
+  const shownTitle = tCount > TITLE_CHAR_LIMIT ? truncateByChars(titleRaw, TITLE_CHAR_LIMIT) : (titleRaw || 'عنوان الصفحة — مثال');
+  pTitle.textContent = shownTitle;
+
+  // URL (توليد المسار من العنوان تلقائيًا طالما auto مفعّل)
+  if (urlAutoMode){
+    const existing = urlInput.value.trim();
+    const domMatch = existing.match(/^https?:\/\/([^\/]+)|^([^\/:]+)(?=\/|$)/i);
+    const domainPart = domMatch ? (domMatch[1] || domMatch[2]) : 'yourdomain.com';
+    const slug = slugFromTitle(titleRaw || 'عنوان-افتراضي');
+    urlInput.value = composeUrl(domainPart, slug);
+  }
+  const rawUrl = urlInput.value;
+  const clean = cleanUrlForDisplay(rawUrl || 'yourdomain.com/slug');
+  const short = midTruncateToFit(clean, m.urlW, FONTS.url);
+  pUrl.textContent = short || 'yourdomain.com';
+  urlCountEl.textContent = `${charCount(urlInput.value)} حرف`;
+  urlState.textContent = '—'; urlState.className='state';
+
+  // Description: التفاف سطرين بالبكسل
+  const descRaw = (descInput.value || '');
+  const dCount = charCount(descRaw);
+  const dEval = evalDescByCount(dCount);
+  descCountEl.textContent = `${dCount} حرف`;
+  descState.textContent = dEval.text; descState.className='state '+dEval.cls;
+
+  const dRes = wrapDescriptionTwoLines(
+    descRaw.trim() || 'هذا الوصف يظهر في سطرين كحد أقصى. إذا طال أكثر فسيتم قصّه تلقائيًا مع إضافة علامة الحذف…',
+    m.descW, FONTS.desc
+  );
+  pDesc.textContent = (dRes.lines[0] + (dRes.lines[1]? '\n'+dRes.lines[1] : '')).trim();
+}
+
+/* === نسخ === */
+async function copyText(s){
+  try{
+    if (navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(s); }
+    else { const ta=document.createElement('textarea'); ta.value=s; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
+  }catch(e){}
+}
+
+/* === Debounce === */
+function debounce(fn,ms=150){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms);} }
+const onInput = debounce(()=>{ render(); saveState(); },150);
+
+/* === تهيئة === */
+(function init(){
+  loadState();
+  if (state.dark) setDark(true);
+  if (state.mode!=='desktop' && state.mode!=='mobile') state.mode='desktop';
+  modeDesktop.checked=state.mode==='desktop'; modeMobile.checked=state.mode==='mobile';
+  applyModeVars();
+
+  if (state.title || state.desc || state.url){
+    titleInput.value=state.title||'';
+    descInput.value =state.desc ||'';
+    urlInput.value  =state.url  ||'';
+  } else {
+    const defTitle = 'كيفية تحسين محركات البحث لمتجرك الإلكتروني خطوة بخطوة';
+    const defDesc  = 'ابدأ من الأساسيات: سرعة الموقع، قابلية الجوال، وبنية المحتوى. اكتب عناوين واضحة ووصفًا يجيب عن نية البحث لتحقيق زيارات مؤهلة.';
+    const slug = slugFromTitle(defTitle);
+    titleInput.value = defTitle;
+    descInput.value  = defDesc;
+    urlInput.value   = 'https://yourdomain.com/'+slug;
+  }
+  render();
+
+  // إدخال
+  titleInput.addEventListener('input', ()=>{ urlAutoMode = true; onInput(); });
+  descInput .addEventListener('input', onInput);
+  urlInput  .addEventListener('input', ()=>{ urlAutoMode = false; onInput(); });
+
+  // تبديل الوضع
+  modeDesktop.addEventListener('change', ()=>setMode('desktop'));
+  modeMobile .addEventListener('change', ()=>setMode('mobile'));
+  modeDesktopLabel.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ setMode('desktop'); }});
+  modeMobileLabel .addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ setMode('mobile'); }});
+
+  // الوضع الداكن
+  darkBtn.addEventListener('click', ()=>setDark(!state.dark));
+  darkBtn.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); setDark(!state.dark); }});
+
+  // نسخ
+  copyTitleBtn.addEventListener('click', ()=>copyText(titleInput.value));
+  copyDescBtn .addEventListener('click', ()=>copyText(descInput.value));
+  copyPreviewBtn.addEventListener('click', ()=>{
+    const t=titleInput.value;
+    const u=cleanUrlForDisplay(urlInput.value);
+    const d=descInput.value;
+    copyText([t,u,d].filter(Boolean).join('\n'));
+  });
+
+  // مسح
+  clearBtn.addEventListener('click', ()=>{
+    titleInput.value=''; descInput.value=''; urlInput.value='';
+    urlAutoMode = true; render(); saveState(); titleInput.focus();
+  });
+
+  // تنقل أعلى الصفحة
+  backBtn.addEventListener('click', ()=>{ if(history.length>1) history.back(); });
+  backBtn.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); if(history.length>1) history.back(); }});
+  homeBtn.addEventListener('click', ()=>{ window.location.href='https://anasrashed.com'; });
+  homeBtn.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); window.location.href='https://anasrashed.com'; }});
+})();
+</script>
+</body>
+</html>
