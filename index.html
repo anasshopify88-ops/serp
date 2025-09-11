@@ -117,7 +117,7 @@
           <button id="clearAllBtn">مسح الكل</button>
         </div>
       </div>
-      <p class="hint">الصق وصف المنتج/الخدمة/المقال (حتى 12000 حرف).</p>
+      <p class="hint">الصق وصف المنتج/الخدمة/المقال (حتى 12000 حرف). لا يوجد توليد محلي — API فقط.</p>
       <textarea id="rawInput" placeholder="الصق وصفًا تفصيليًا هنا..."></textarea>
       <div class="chips">
         <span class="chip" id="wordInfo">0 كلمة</span>
@@ -167,7 +167,7 @@
           </div>
         </div>
         <input id="urlInput" type="text" aria-label="حقل الرابط" placeholder="https://yourdomain.com/مسار-الصفحة">
-        <div class="note">المسار يُقترح تلقائيًا من عنوان التوليد.</div>
+        <div class="note">المسار يُقترح تلقائيًا من العنوان المولّد.</div>
       </div>
 
       <div class="btns">
@@ -193,16 +193,14 @@
 
 <script>
 /* ========== إعداد الذكاء الاصطناعي (API فقط) ========= */
-const AI_CONFIG = {
-  enabled: true,
-  // ✨ ضع رابط الـWorker الحقيقي هنا (مثال):
-  // baseUrl: "https://serp-api.anasrashed.workers.dev"
-  baseUrl: "https://YOUR_WORKER_SUBDOMAIN.workers.dev",
-  model: "gpt-4o-mini",
-  timeoutMs: 25000
+// غيّر هذا إلى عنوان الوِركر لديك:
+const API_BASE = "https://seo-generate.anasshopify88.workers.dev";
+const ENDPOINTS = {
+  gen:  API_BASE + "/api/generate",
+  ping: API_BASE + "/ping",
+  diag: API_BASE + "/diag",
 };
 
-/* === قياس بالبكسل عبر Canvas === */
 (function(){ const c=document.createElement('canvas'),x=c.getContext('2d'); window.measurePx=(t,f)=>{x.font=f; return x.measureText(t==null?'':String(t)).width}; })();
 const FONTS = {
   title:'800 22px Arial, Helvetica, sans-serif',
@@ -225,8 +223,8 @@ const btnTrimTitle=$('#btnTrimTitle'), btnClampDesc=$('#btnClampDesc');
 const rawInput=$('#rawInput'), generateBtn=$('#generateBtn'), clearAllBtn=$('#clearAllBtn');
 const wordInfo=$('#wordInfo');
 
-let state={dark:false, title:'', desc:'', url:'', raw:''};
-const STORAGE_KEY='serp_ai_preview_state_v4';
+let state={title:'', desc:'', url:'', raw:''};
+const STORAGE_KEY='serp_ai_preview_state_final';
 let urlAutoMode = true;
 
 /* ========= Utils ========= */
@@ -245,7 +243,6 @@ const slugFromTitle = t => {
 const composeUrl = (domainPart, pathPart) => 'https://' + extractDomain(domainPart) + (pathPart?'/'+pathPart:'');
 const availableWidth = el => Math.max(60, Math.floor(el.getBoundingClientRect().width));
 const updateLimitsText = () => { limitsText.textContent = `${availableWidth(serp)}px`; };
-
 function truncateByChars(text, limit){
   const arr = Array.from(text||''); if (arr.length<=limit) return text||'';
   const sliced = arr.slice(0, limit).join(''); const lastSpace = sliced.lastIndexOf(' ');
@@ -263,29 +260,7 @@ function midTruncateToFit(str, limitPx, font){
   let base=''; for (let i=0;i<str.length;i++){ const c=base+str[i]; if (measurePx(c+ELLIPSIS,font)<=limitPx) base=c; else break; }
   return base+ELLIPSIS;
 }
-
 function normalizeWS(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
-
-/* ========= API ========= */
-async function aiGenerate(raw){
-  const controller = new AbortController();
-  const timeout = setTimeout(()=>controller.abort(), AI_CONFIG.timeoutMs);
-  let respText = "";
-  const payload = { model: AI_CONFIG.model, text: raw, temperature: 0.2 };
-  try{
-    const resp = await fetch(AI_CONFIG.baseUrl, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload), mode:'cors', cache:'no-store', signal: controller.signal
-    });
-    clearTimeout(timeout);
-    respText = await resp.text();
-    if (!resp.ok) throw new Error(respText || `HTTP ${resp.status}`);
-    return JSON.parse(respText); // {title, meta, slug}
-  }catch(err){
-    clearTimeout(timeout);
-    throw err;
-  }
-}
 
 /* ========= Render ========= */
 function render(){
@@ -310,10 +285,9 @@ function render(){
   const dRaw = descInput.value || '';
   const dCount = charCount(dRaw);
   descCountEl.textContent = `${dCount} حرف`;
-  descState.textContent = (dCount>160)?'طويل':(dCount<80?'قصير':'مناسب'); // إشارة تقريبية فقط
+  descState.textContent = (dCount>160)?'طويل':(dCount<80?'قصير':'مناسب');
   descState.className = 'state ' + ((dCount>160)?'bad':(dCount<80?'warn':'ok'));
 
-  // معاينة الوصف بسطرين
   const linePx = availableWidth(pDesc);
   const tokens = String(dRaw).replace(/\n+/g,' ').split(/(\s+)/);
   let lines=['','']; let iLine=0;
@@ -345,29 +319,40 @@ async function copyText(s){
 }
 function debounce(fn,ms=150){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms);} }
 const onInput = debounce(()=>{ render(); saveState(); },150);
-
-function saveState(){
-  state.title=titleInput.value||''; state.desc=descInput.value||''; state.url=urlInput.value||'';
-  state.raw=rawInput.value||'';
-  try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){}
-}
+function saveState(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify({ title:titleInput.value||'', desc:descInput.value||'', url:urlInput.value||'', raw:rawInput.value||'' }));}catch(e){} }
 function loadState(){
-  try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ state=Object.assign(state, JSON.parse(raw)||{}); } }catch(e){}
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const s=JSON.parse(raw)||{};
+      titleInput.value = s.title||''; descInput.value=s.desc||''; urlInput.value=s.url||''; rawInput.value=s.raw||'';
+    }
+  }catch(e){}
 }
 
-/* ========= قصّ يدوي ========= */
-btnTrimTitle.addEventListener('click', ()=>{
-  if (!titleInput.value) return;
-  if (charCount(titleInput.value) > TITLE_MAX) titleInput.value = truncateByChars(titleInput.value, TITLE_MAX);
-  render(); saveState();
-});
-btnClampDesc.addEventListener('click', ()=>{
-  if (!descInput.value) return;
-  if (charCount(descInput.value) > META_MAX) descInput.value = truncateByChars(descInput.value, META_MAX);
-  render(); saveState();
-});
+/* ========= API ========= */
+async function aiGenerate(raw){
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 25000);
+  let respText = "";
+  try{
+    const resp = await fetch(ENDPOINTS.gen, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({ model:'gpt-4o-mini', text: raw, temperature: 0.2 }),
+      mode:'cors', cache:'no-store', signal: controller.signal
+    });
+    clearTimeout(timeout);
+    respText = await resp.text();
+    if (!resp.ok) throw new Error(respText || `HTTP ${resp.status}`);
+    return JSON.parse(respText); // {title, meta, slug}
+  }catch(err){
+    clearTimeout(timeout);
+    throw err;
+  }
+}
 
-/* ========= توليد (API فقط) ========= */
+/* ========= توليد ========= */
 async function generateFromRaw(){
   aiErr.hidden = true; aiErr.textContent = '';
   aiBanner.hidden = true; aiWarn.hidden = true;
@@ -379,19 +364,15 @@ async function generateFromRaw(){
   generateBtn.classList.add('loading'); generateBtn.textContent='... جاري التوليد';
 
   try{
-    const out = await aiGenerate(raw); // {title, meta, slug}
-    // تأكيد الحدود الصارمة في الواجهة أيضًا
+    const out = await aiGenerate(raw);
     const t = charCount(out.title) > TITLE_MAX ? truncateByChars(out.title, TITLE_MAX) : out.title;
     const m = charCount(out.meta)  > META_MAX  ? truncateByChars(out.meta,  META_MAX ) : out.meta;
-
     titleInput.value = t;
     descInput.value  = m;
-
     const currentDomain = extractDomain(urlInput.value || 'yourdomain.com');
-    urlInput.value   = composeUrl(currentDomain, slugFromTitle(t));
+    urlInput.value   = 'https://' + currentDomain + '/' + slugFromTitle(t);
     urlAutoMode = false;
-
-    aiBanner.hidden = false; // نجاح
+    aiBanner.hidden = false;
     render(); saveState();
   }catch(err){
     aiWarn.hidden = false;
@@ -404,15 +385,13 @@ async function generateFromRaw(){
 /* ========= تهيئة ========= */
 (function init(){
   loadState();
-
-  const defTitle='أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
-  const defDesc='أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجر من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.';
-  titleInput.value = state.title || defTitle;
-  descInput.value  = state.desc  || defDesc;
-  urlInput.value   = state.url   || ('https://yourdomain.com/'+slugFromTitle(defTitle));
-  rawInput.value   = state.raw   || '';
-  wordInfo.textContent = `${(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length} كلمة`;
-
+  if (!titleInput.value){
+    const defTitle='أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
+    const defDesc='أنا أنس راشد مختص تحسين محركات البحث، أساعدك في تحقيق زيارات لمتجر من محركات البحث، وصممت هذه الاداة لتساعدك على كتابة عنوان ووصف ورابط مثالي لمنتجك أو مقالتك.';
+    titleInput.value = defTitle;
+    descInput.value  = defDesc;
+    urlInput.value   = 'https://yourdomain.com/' + slugFromTitle(defTitle);
+  }
   render();
 
   rawInput.addEventListener('input', ()=>{
@@ -446,7 +425,6 @@ async function generateFromRaw(){
     const on=document.body.classList.contains('dark');
     darkBtn.setAttribute('aria-pressed', on);
     darkBtn.textContent = on ? 'الوضع الفاتح' : 'الوضع الداكن';
-    saveState();
   });
 
   copyTitleBtn.addEventListener('click', ()=>copyText(titleInput.value));
