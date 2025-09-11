@@ -201,8 +201,8 @@ function midTruncateToFit(str, limitPx, font){
 function render(){
   const titleRaw = normalizeWS(titleInput.value).trimStart();
   const enforcedTitle = (charCount(titleRaw) > TITLE_MAX) ? truncateByChars(titleRaw, TITLE_MAX) : titleRaw;
-  titleCountEl.textContent = `${charCount(titleRaw)} حرف`;
-  titleState.textContent = (charCount(titleRaw)>60)?'طويل':(charCount(titleRaw)<30?'قصير':'مناسب');
+titleCountEl.textContent = `${charCount(titleRaw)} حرف`;
+titleState.textContent = (charCount(titleRaw)>TITLE_MAX)?'طويل':(charCount(titleRaw)<TITLE_MIN?'قصير':'مناسب');
   titleState.className = 'state ' + ((charCount(titleRaw)>60)?'bad':(charCount(titleRaw)<30)?'warn':'ok');
   pTitle.textContent = enforcedTitle || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
 
@@ -213,8 +213,8 @@ function render(){
   urlCountEl.textContent = `${charCount(urlInput.value)} حرف`; urlState.textContent='—'; urlState.className='state';
 
   const dRaw = descInput.value || '';
-  descCountEl.textContent = `${charCount(dRaw)} حرف`;
-  descState.textContent = (charCount(dRaw)>160)?'طويل':(charCount(dRaw)<80?'قصير':'مناسب');
+descCountEl.textContent = `${charCount(dRaw)} حرف`;
+descState.textContent = (charCount(dRaw)>META_MAX)?'طويل':(charCount(dRaw)<META_MIN?'قصير':'مناسب');
   descState.className = 'state ' + ((charCount(dRaw)>160)?'bad':(charCount(dRaw)<80)?'warn':'ok');
 
   const linePx = availableWidth(pDesc);
