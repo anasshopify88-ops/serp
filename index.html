@@ -152,7 +152,7 @@
   </div>
 </div>
 
-<script>
+  <script>
 const API_BASE = "https://seo-generate.anasshopify88.workers.dev";
 const ENDPOINTS = { gen: API_BASE + "/api/generate", ping: API_BASE + "/ping", diag: API_BASE + "/diag" };
 
@@ -226,8 +226,9 @@ async function aiGenerate(raw){
   let respText = "";
   try{
     const resp = await fetch(ENDPOINTS.gen, {
-      method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body: JSON.stringify({ model:'gpt-4o-mini', text: raw, temperature: 0.2 }),
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({ text: raw }),
       mode:'cors', cache:'no-store', signal: controller.signal
     });
     clearTimeout(timeout);
@@ -237,51 +238,39 @@ async function aiGenerate(raw){
   }catch(err){ clearTimeout(timeout); throw err; }
 }
 
-function showErrorMessage(eText){
-  aiErr.hidden = false;
-  aiErr.textContent = eText;
-}
+function showErrorMessage(eText){ aiErr.hidden = false; aiErr.textContent = eText; }
 function clearError(){ aiErr.hidden = true; aiErr.textContent = ""; }
 
 async function generateFromRaw(){
-  clearError(); setStatus('', ''); // اخفِ الحالة أولاً
+  clearError(); setStatus('', '');
   let raw = rawInput.value || '';
   if (charCount(raw) > 12000) raw = Array.from(raw).slice(0,12000).join('');
 
   generateBtn.classList.add('loading'); generateBtn.textContent='... جاري التوليد';
   try{
     const out = await aiGenerate(raw);
+    if (!out || !out.title || !out.meta){
+      throw new Error('استجابة غير صالحة من الخادم.');
+    }
     titleInput.value = (charCount(out.title)>TITLE_MAX) ? truncateByChars(out.title, TITLE_MAX) : out.title;
     descInput.value  = (charCount(out.meta) >META_MAX ) ? truncateByChars(out.meta , META_MAX ) : out.meta;
-    // slug يُبنى من العنوان محليًا للعرض فقط (الخادم أصلاً يعيده كذلك)
-    const dom = extractDomain(urlInput.value || 'yourdomain.com');
-    urlInput.value   = 'https://' + dom + '/' + slugFromTitle(titleInput.value);
 
-    // حالة نجاح مع ذكر المزوّد (openai أو cloudflare)
-    setStatus('ok', out.provider === 'cloudflare'
-      ? 'تم التوليد بنجاح عبر Cloudflare AI (Fallback).'
-      : 'تم التوليد بنجاح عبر OpenAI.');
+    const dom = extractDomain(urlInput.value || 'yourdomain.com');
+    const slug = out.slug || slugFromTitle(titleInput.value);
+    urlInput.value   = 'https://' + dom + '/' + slug;
+
+    setStatus('ok', 'تم التوليد بنجاح عبر Cloudflare AI.');
     render();
   }catch(err){
-    // أخفِ أي نجاح سابق ثم اعرض سبب الفشل بوضوح
     setStatus('bad', 'فشل الاتصال بالـAPI.');
     let msg = String(err||'');
-    // لو رجع JSON خطأ من الخادم
-    try{
-      const parsed = JSON.parse(msg);
-      if (parsed && parsed.error && parsed.providerStatus === 429) {
-        msg = 'نفد رصيد OpenAI (429). إن كان Cloudflare AI مضبوطًا سيُستخدم تلقائيًا. تحقق من الفوترة أو فعّل البديل.';
-      } else if (parsed && parsed.error && parsed.hint) {
-        msg = parsed.hint;
-      }
-    }catch(_){}
     showErrorMessage('فشل التوليد: ' + msg);
   }finally{
     generateBtn.classList.remove('loading'); generateBtn.textContent='توليد';
   }
 }
 
-/* ========= تهيئة ========= */
+/* ========= init ========= */
 (function init(){
   titleInput.value='أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
   descInput.value='أنا أنس راشد مختص تحسين محركات البحث؛ أداة لكتابة عنوان ووصف ورابط مثالي يظهر بشكل احترافي في نتائج البحث.';
@@ -318,5 +307,7 @@ async function generateFromRaw(){
   });
 })();
 </script>
+
+ 
 </body>
 </html>
