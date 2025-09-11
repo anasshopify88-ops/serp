@@ -218,11 +218,10 @@
 </div>
 
 <script>
-
 /* ========== تفعيل الذكاء الاصطناعي عبر الوِركر ========== */
 const AI_CONFIG = {
   enabled: true,
-  baseUrl: "https://seo-generate.anasshopify88.workers.dev",  // رابط الوركر
+  baseUrl: "https://seo-generate.anasshopify88.workers.dev",
   apiKey: "",
   provider: "cf",
   model: "@cf/meta/llama-3.1-8b-instruct",
@@ -373,7 +372,7 @@ function topKeywords(text, max=6){
 function makeTitleFrom(text){
   const kws = topKeywords(text, 5);
   let base = kws.slice(0,3).join(' | ');
-  if (!base) base = (text||'').trim().split(/\s+/).slice(0,6).join(' ');
+  if (!base) base = (text||'').trim().split(/\س+/).slice(0,6).join(' ');
   base = base.replace(/\s+/g,' ').trim();
   if (charCount(base) > TITLE_CHAR_LIMIT) base = truncateByChars(base, TITLE_CHAR_LIMIT);
   return base;
@@ -406,17 +405,39 @@ async function aiGenerate(raw){
   ].join("\n");
   const user = `الوصف:\n${raw}\n\nأعد الناتج وفق القيود أعلاه.`;
 
-  const resp = await fetch(AI_CONFIG.baseUrl, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      model: AI_CONFIG.model,
-      messages: [{role:'system', content:sys},{role:'user', content:user}],
-      temperature: 0.3
-    })
-  });
-  if (!resp.ok) throw new Error('AI request failed');
-  return await resp.json(); // ← {title, meta, slug}
+  const payload = {
+    model: AI_CONFIG.model,
+    messages: [{role:'system', content:sys},{role:'user', content:user}],
+    temperature: 0.3
+  };
+
+  // طلب متين مع مهلة وتثبيت CORS
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 25000);
+  let respText = "";
+  try{
+    const resp = await fetch(AI_CONFIG.baseUrl, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+      mode:'cors',
+      cache:'no-store',
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    respText = await resp.text();
+    if (!resp.ok){
+      throw new Error(`AI ${resp.status}: ${respText.slice(0,200)}`);
+    }
+    let data;
+    try{ data = JSON.parse(respText); }
+    catch{ throw new Error(`Bad JSON from worker: ${respText.slice(0,200)}`); }
+    return data; // {title, meta, slug}
+  }catch(err){
+    clearTimeout(timeout);
+    console.error("AI error:", err.message, "\nRAW:", respText.slice(0,400));
+    throw err;
+  }
 }
 
 /* ========= العرض ========= */
