@@ -16,8 +16,8 @@
   html,body{height:100%; overflow-x:hidden; width:100%; max-width:100%; -webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 Arial, Helvetica, sans-serif}
   @media (min-width:1280px){ body{font-size:16px} }
+
   .wrap{max-width:1200px;margin:24px auto;padding:0 12px 40px;width:100%}
-  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:12px}
   .avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow)}
@@ -26,12 +26,21 @@
   .toggle,.nav-btn{padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
   .nav-btn.home{background:#000;color:#fff;border-color:#000}
 
-  .row{display:grid; gap:20px; align-items:start; grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr); grid-template-areas: "ai preview" "fields preview";}
-  @media (max-width:1024px){ .row{grid-template-columns:1fr;grid-template-areas:"ai" "fields" "preview";gap:14px} }
+  /* تخطيط الشبكة */
+  .row{display:grid; gap:16px; align-items:start; grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr); grid-template-areas: "ai preview" "fields preview";}
+  @media (max-width:1024px){
+    .row{grid-template-columns:1fr;grid-template-areas:"ai" "fields" "preview"; gap:12px}
+  }
 
   .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
   .card{padding:16px}
-  .preview{padding:16px; position:sticky; top:16px; align-self:start}
+  .preview{padding:16px; position:sticky; top:16px; align-self:start; margin:0}
+  @media (max-width:1024px){
+    .preview{ position:static; top:auto }
+  }
+
+  /* إزالة أي فراغ سفلي زائد */
+  .fields .field:last-child{ margin-bottom: 0 }
 
   .ai-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
   .ai-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -79,7 +88,7 @@
   </header>
 
   <div class="row">
-    <section class="card" id="sec-ai">
+    <section class="card" id="sec-ai" style="grid-area:ai">
       <div class="ai-head">
         <h2 style="margin:0;font-size:16px">إنشاء العنوان والوصف والرابط تلقائيًا</h2>
         <div class="ai-actions">
@@ -97,7 +106,7 @@
       <div id="aiErr" class="err" hidden></div>
     </section>
 
-    <section class="card fields" id="sec-fields">
+    <section class="card fields" id="sec-fields" style="grid-area:fields">
       <div class="field">
         <div class="label">
           <label for="titleInput">العنوان (Title)</label>
@@ -141,7 +150,7 @@
       </div>
     </section>
 
-    <section class="preview" id="sec-preview">
+    <section class="preview" id="sec-preview" style="grid-area:preview">
       <div class="serp" id="serp">
         <h3 class="title" id="pTitle">أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد</h3>
         <p class="url"><span dir="ltr" id="pUrl">yourdomain.com/أداة-محاكاة-نتائج-بحث</span></p>
@@ -152,7 +161,7 @@
   </div>
 </div>
 
-  <script>
+<script>
 const API_BASE = "https://seo-generate.anasshopify88.workers.dev";
 const ENDPOINTS = { gen: API_BASE + "/api/generate", ping: API_BASE + "/ping", diag: API_BASE + "/diag" };
 
@@ -169,7 +178,6 @@ const descCountEl=$('#descCount'), descState=$('#descState');
 const urlCountEl=$('#urlCount'), urlState=$('#urlState');
 const rawInput=$('#rawInput'), generateBtn=$('#generateBtn'), clearAllBtn=$('#clearAllBtn');
 const btnTrimTitle=$('#btnTrimTitle'), btnClampDesc=$('#btnClampDesc');
-const copyTitleBtn=$('#copyTitleBtn'), copyDescBtn=$('#copyDescBtn'), copyPreviewBtn=$('#copyPreviewBtn');
 
 function setStatus(kind, msg){
   statusEl.className = 'status ' + (kind||'') + (msg?'':' hidden');
@@ -195,7 +203,7 @@ function render(){
   const enforcedTitle = (charCount(titleRaw) > TITLE_MAX) ? truncateByChars(titleRaw, TITLE_MAX) : titleRaw;
   titleCountEl.textContent = `${charCount(titleRaw)} حرف`;
   titleState.textContent = (charCount(titleRaw)>60)?'طويل':(charCount(titleRaw)<30?'قصير':'مناسب');
-  titleState.className = 'state ' + ((charCount(titleRaw)>60)?'bad':(charCount(titleRaw)<30?'warn':'ok'));
+  titleState.className = 'state ' + ((charCount(titleRaw)>60)?'bad':(charCount(titleRaw)<30)?'warn':'ok');
   pTitle.textContent = enforcedTitle || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
 
   const dom = extractDomain(urlInput.value || 'yourdomain.com');
@@ -207,7 +215,7 @@ function render(){
   const dRaw = descInput.value || '';
   descCountEl.textContent = `${charCount(dRaw)} حرف`;
   descState.textContent = (charCount(dRaw)>160)?'طويل':(charCount(dRaw)<80?'قصير':'مناسب');
-  descState.className = 'state ' + ((charCount(dRaw)>160)?'bad':(charCount(dRaw)<80?'warn':'ok'));
+  descState.className = 'state ' + ((charCount(dRaw)>160)?'bad':(charCount(dRaw)<80)?'warn':'ok');
 
   const linePx = availableWidth(pDesc);
   const tokens = String(dRaw).replace(/\n+/g,' ').split(/(\s+)/);
@@ -252,11 +260,15 @@ async function generateFromRaw(){
     if (!out || !out.title || !out.meta){
       throw new Error('استجابة غير صالحة من الخادم.');
     }
-    titleInput.value = (charCount(out.title)>TITLE_MAX) ? truncateByChars(out.title, TITLE_MAX) : out.title;
-    descInput.value  = (charCount(out.meta) >META_MAX ) ? truncateByChars(out.meta , META_MAX ) : out.meta;
+    // قصّ صارم هنا أيضًا (ازدواجية اطمئنان)
+    const title = (charCount(out.title)>TITLE_MAX) ? truncateByChars(out.title, TITLE_MAX) : out.title;
+    const meta  = (charCount(out.meta )>META_MAX ) ? truncateByChars(out.meta , META_MAX ) : out.meta;
+
+    titleInput.value = title;
+    descInput.value  = meta;
 
     const dom = extractDomain(urlInput.value || 'yourdomain.com');
-    const slug = out.slug || slugFromTitle(titleInput.value);
+    const slug = out.slug || slugFromTitle(title);
     urlInput.value   = 'https://' + dom + '/' + slug;
 
     setStatus('ok', 'تم التوليد بنجاح عبر Cloudflare AI.');
@@ -277,37 +289,35 @@ async function generateFromRaw(){
   urlInput.value='https://yourdomain.com/' + slugFromTitle(titleInput.value);
 
   render();
-  rawInput.addEventListener('input', ()=>{ const wc=(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length; $('#wordInfo').textContent=`${wc} كلمة`; });
+  rawInput.addEventListener('input', ()=>{ const wc=(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length; document.querySelector('#wordInfo').textContent=`${wc} كلمة`; });
   titleInput.addEventListener('input', render);
   descInput .addEventListener('input', render);
   urlInput  .addEventListener('input', render);
-  btnTrimTitle.addEventListener('click', ()=>{ if (charCount(titleInput.value)>TITLE_MAX) titleInput.value = truncateByChars(titleInput.value, TITLE_MAX); render(); });
-  btnClampDesc.addEventListener('click', ()=>{ if (charCount(descInput.value)>META_MAX) descInput.value = truncateByChars(descInput.value, META_MAX); render(); });
-  $('#clearBtn').addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; render(); });
-  clearAllBtn.addEventListener('click', ()=>{ rawInput.value=''; $('#wordInfo').textContent='0 كلمة'; });
-  $('#copyTitleBtn').addEventListener('click', ()=>navigator.clipboard.writeText(titleInput.value));
-  $('#copyDescBtn') .addEventListener('click', ()=>navigator.clipboard.writeText(descInput.value));
-  $('#copyPreviewBtn').addEventListener('click', ()=>navigator.clipboard.writeText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n')));
-  $('#backBtn').addEventListener('click', ()=>history.back());
-  $('#homeBtn').addEventListener('click', ()=>location.href='/');
+  document.querySelector('#btnTrimTitle').addEventListener('click', ()=>{ if (charCount(titleInput.value)>TITLE_MAX) titleInput.value = truncateByChars(titleInput.value, TITLE_MAX); render(); });
+  document.querySelector('#btnClampDesc').addEventListener('click', ()=>{ if (charCount(descInput.value)>META_MAX) descInput.value = truncateByChars(descInput.value, META_MAX); render(); });
+  document.querySelector('#clearBtn').addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; render(); });
+  document.querySelector('#clearAllBtn').addEventListener('click', ()=>{ rawInput.value=''; document.querySelector('#wordInfo').textContent='0 كلمة'; });
+  document.querySelector('#copyTitleBtn').addEventListener('click', ()=>navigator.clipboard.writeText(titleInput.value));
+  document.querySelector('#copyDescBtn') .addEventListener('click', ()=>navigator.clipboard.writeText(descInput.value));
+  document.querySelector('#copyPreviewBtn').addEventListener('click', ()=>navigator.clipboard.writeText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n')));
+  document.querySelector('#backBtn').addEventListener('click', ()=>history.back());
+  document.querySelector('#homeBtn').addEventListener('click', ()=>location.href='/');
 
-  $('#darkBtn').addEventListener('click', ()=>{
+  document.querySelector('#darkBtn').addEventListener('click', ()=>{
     document.body.classList.toggle('dark');
     const on=document.body.classList.contains('dark');
-    $('#darkBtn').setAttribute('aria-pressed', on);
-    $('#darkBtn').textContent = on ? 'الوضع الفاتح' : 'الوضع الداكن';
+    document.querySelector('#darkBtn').setAttribute('aria-pressed', on);
+    document.querySelector('#darkBtn').textContent = on ? 'الوضع الفاتح' : 'الوضع الداكن';
   });
 
-  $('#generateBtn').addEventListener('click', ()=>{
+  document.querySelector('#generateBtn').addEventListener('click', ()=>{
     if (!rawInput.value.trim()){
       rawInput.value = [titleInput.value, descInput.value].join('\n');
-      $('#wordInfo').textContent=`${(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length} كلمة`;
+      document.querySelector('#wordInfo').textContent=`${(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length} كلمة`;
     }
     generateFromRaw();
   });
 })();
 </script>
-
- 
 </body>
 </html>
