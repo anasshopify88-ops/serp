@@ -11,6 +11,10 @@
     --g-blue:#1a0dab; --g-url:#3c4043; --g-desc:#4d5156;
     --title-w:600px; --desc-w:920px; --url-w:600px; --radius:16px;
   }
+  /* تلقائيًا على الشاشات الصغيرة ننتقل لقيم الموبايل */
+  @media (max-width:700px){
+    :root{ --title-w:550px; --desc-w:680px; --url-w:550px; }
+  }
   .dark{
     --bg:#0b1220; --text:#e5e7eb; --muted:#9aa4b2; --card:#0f172a; --border:#1f2a44; --shadow:0 10px 30px rgba(0,0,0,.4);
     --g-blue:#8ab4f8; --g-url:#bdc1c6; --g-desc:#bdc1c6;
@@ -18,12 +22,10 @@
 
   *{box-sizing:border-box}
   html,body{height:100%}
-  /* منع أي تمدد أفقي */
-  html,body{overflow-x:hidden}
+  html,body{overflow-x:hidden} /* منع أي تمدد أفقي */
   body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 Arial, Helvetica, sans-serif}
   .wrap{max-width:1100px;margin:28px auto;padding:0 16px 40px}
 
-  /* إخفاء بصري دون دفع المحتوى خارج الشاشة */
   .sr-only{
     position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
     clip:rect(0,0,0,0);white-space:nowrap;border:0;
@@ -33,16 +35,11 @@
   .brand{display:flex;align-items:center;gap:12px}
   .avatar{
     width:64px;height:64px;border-radius:50%;
-    object-fit:contain; /* تُظهِر الصورة كاملة دون قص */
-    background:#fff; border:1px solid var(--border); box-shadow:var(--shadow);
+    object-fit:contain; background:#fff; border:1px solid var(--border); box-shadow:var(--shadow);
   }
   .title{font-size:22px;font-weight:800;letter-spacing:.2px}
 
   .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .segmented{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
-  .segmented input{position:absolute;opacity:0;pointer-events:none}
-  .segmented label{padding:8px 14px;cursor:pointer;user-select:none;min-width:110px;text-align:center;color:var(--muted)}
-  .segmented input:checked + label{background:var(--primary);color:#fff}
   .toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
 
   .nav-btn{padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
@@ -66,13 +63,13 @@
   button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
   button:focus{outline:2px solid var(--primary);outline-offset:2px}
 
-  /* معاينة (بطاقة) */
+  /* معاينة */
   .preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 16px}
   .serp{display:flex;flex-direction:column;gap:2px}
   .serp .title{
     font:800 20px/1.3 Arial, Helvetica, sans-serif;
     color:var(--g-blue);margin:0;max-width:var(--title-w);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* لا يهبط للسطر الثاني */
   }
   .serp .url{color:var(--g-url);font:normal 13px/1.6 Arial, Helvetica, sans-serif;margin:0 0 2px;max-width:var(--url-w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .serp .desc{color:var(--g-desc);font:normal 15px/1.4 Arial, Helvetica, sans-serif;margin:0;max-width:var(--desc-w);white-space:pre-line}
@@ -89,17 +86,9 @@
       <div class="title">أداة محاكاة مجانية لنتائج جوجل من أنس راشد</div>
     </div>
 
-    <div class="header-actions" role="group" aria-label="خيارات العرض والتنقل">
+    <div class="header-actions" role="group" aria-label="خيارات التنقل">
       <button id="backBtn" class="nav-btn" title="رجوع">رجوع</button>
       <button id="homeBtn" class="nav-btn home" title="الرئيسية">الرئيسية</button>
-
-      <div class="segmented" role="tablist" aria-label="تبديل وضع العرض">
-        <input id="modeDesktop" type="radio" name="mode" value="desktop" checked>
-        <label id="modeDesktopLabel" for="modeDesktop" role="tab" tabindex="0">الكمبيوتر</label>
-        <input id="modeMobile" type="radio" name="mode" value="mobile">
-        <label id="modeMobileLabel" for="modeMobile" role="tab" tabindex="-1">الجوال</label>
-      </div>
-
       <button id="darkBtn" class="toggle" aria-pressed="false" aria-label="تبديل الوضع الداكن">الوضع الداكن</button>
     </div>
   </header>
@@ -163,25 +152,20 @@
         <p class="desc" id="pDesc">هذا الوصف يظهر كحد أقصى في سطرين. إذا كان أطول فسيتم قصّه وإضافة علامة الحذف…</p>
       </div>
       <div class="foot-help">
-        • حدود العدّ: العنوان 61 حرف — الوصف 160 حرف. • حدود العرض النمطية للمعاينة: <span id="limitsText">Title 600px — Desc 920px × 2 — URL 600px</span>
+        • حدود العدّ: العنوان 61 حرف — الوصف 160 حرف. • حدود العرض الحالية: <span id="limitsText">—</span>
       </div>
     </section>
   </div>
 </div>
 
 <script>
-/* === قياس عرض النص بالبكسل عبر Canvas (دالة عامة مطلوبة) === */
+/* ===== قياس بالبكسل (دالة عامة) ===== */
 (function(){
   const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
   function measurePx(text, font){ ctx.font = font; return ctx.measureText(text==null?'':String(text)).width; }
   window.measurePx = measurePx;
 })();
 
-/* === إعدادات العرض === */
-const MODES = {
-  desktop:{ titleW:600, descW:920, urlW:600 },
-  mobile :{ titleW:550, descW:680, urlW:550 }
-};
 const FONTS = {
   title:'800 20px Arial, Helvetica, sans-serif',
   desc :'normal 15px Arial, Helvetica, sans-serif',
@@ -190,8 +174,33 @@ const FONTS = {
 const ELLIPSIS='…';
 const TITLE_CHAR_LIMIT = 61;
 
-/* === أدوات مساعدة === */
 const $=s=>document.querySelector(s);
+const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
+const pTitle=$('#pTitle'), pUrl=$('#pUrl'), pDesc=$('#pDesc');
+const darkBtn=$('#darkBtn');
+const titleCountEl=$('#titleCount'), titleState=$('#titleState');
+const descCountEl=$('#descCount'), descState=$('#descState');
+const urlCountEl=$('#urlCount'), urlState=$('#urlState');
+const limitsText=$('#limitsText');
+const copyTitleBtn=$('#copyTitleBtn'), copyDescBtn=$('#copyDescBtn'), copyPreviewBtn=$('#copyPreviewBtn');
+const clearBtn=$('#clearBtn'), backBtn=$('#backBtn'), homeBtn=$('#homeBtn');
+
+let state={dark:false, title:'', desc:'', url:''};
+const STORAGE_KEY='serp_preview_state_v7';
+let urlAutoMode = true;
+
+function cssVarPx(name){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return parseFloat(v||'0')||0;
+}
+function updateLimitsText(){
+  // استخدم العرض الفعلي للعناصر حتى تكون المحاكاة مثالية على الجوال
+  const tW = Math.min(cssVarPx('--title-w'), pTitle.clientWidth || cssVarPx('--title-w'));
+  const dW = Math.min(cssVarPx('--desc-w'),  pDesc.clientWidth  || cssVarPx('--desc-w'));
+  const uW = Math.min(cssVarPx('--url-w'),   pUrl.clientWidth   || cssVarPx('--url-w'));
+  limitsText.textContent = `Title ${Math.round(tW)}px — Desc ${Math.round(dW)}px × 2 — URL ${Math.round(uW)}px`;
+}
+
 const charCount = s => Array.from(String(s||'')).length;
 
 function truncateByChars(text, limit){
@@ -261,57 +270,29 @@ function slugFromTitle(t){
   s = s.replace(/\s+/g,'-').replace(/\-+/g,'-').replace(/^\-|\-$/g,'');
   return s.toLowerCase();
 }
+function extractDomain(raw){
+  if(!raw) return 'yourdomain.com';
+  let s = raw.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
+  s = s.split('/')[0].replace(/\/+$/,'');
+  return s || 'yourdomain.com';
+}
 function composeUrl(domainPart, pathPart){
-  let d = (domainPart||'').trim();
-  if (!d) d = 'yourdomain.com';
-  d = d.replace(/^https?:\/\//i,'').replace(/\/+$/,'');
+  const d = extractDomain(domainPart);
   return 'https://' + d + (pathPart?'/'+pathPart:'');
 }
 
-/* === DOM === */
-const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
-const pTitle=$('#pTitle'), pUrl=$('#pUrl'), pDesc=$('#pDesc');
-const modeDesktop=$('#modeDesktop'), modeMobile=$('#modeMobile');
-const modeDesktopLabel=$('#modeDesktopLabel'), modeMobileLabel=$('#modeMobileLabel');
-const darkBtn=$('#darkBtn');
-const titleCountEl=$('#titleCount'), titleState=$('#titleState');
-const descCountEl=$('#descCount'), descState=$('#descState');
-const urlCountEl=$('#urlCount'), urlState=$('#urlState');
-const limitsText=$('#limitsText');
-const copyTitleBtn=$('#copyTitleBtn'), copyDescBtn=$('#copyDescBtn'), copyPreviewBtn=$('#copyPreviewBtn');
-const clearBtn=$('#clearBtn'), backBtn=$('#backBtn'), homeBtn=$('#homeBtn');
-
-/* === حالة وتخزين === */
-let state={mode:'desktop', dark:false, title:'', desc:'', url:''};
-const STORAGE_KEY='serp_preview_state_v6';
-let urlAutoMode = true;
-
+/* ===== حالة وتخزين ===== */
 function saveState(){ state.title=titleInput.value||''; state.desc=descInput.value||''; state.url=urlInput.value||''; try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){} }
 function loadState(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ state=Object.assign(state, JSON.parse(raw)||{}); } }catch(e){} }
 
-/* === تبديل الوضع === */
-function applyModeVars(){
-  const m = state.mode==='desktop'? MODES.desktop : MODES.mobile;
-  document.documentElement.style.setProperty('--title-w', m.titleW+'px');
-  document.documentElement.style.setProperty('--desc-w',  m.descW +'px');
-  document.documentElement.style.setProperty('--url-w',   m.urlW  +'px');
-  limitsText.textContent = `Title ${m.titleW}px — Desc ${m.descW}px × 2 — URL ${m.urlW}px`;
-}
-function setMode(mode){
-  state.mode=mode; modeDesktop.checked=mode==='desktop'; modeMobile.checked=mode==='mobile';
-  modeDesktopLabel.setAttribute('tabindex', mode==='desktop'?'0':'-1');
-  modeMobileLabel .setAttribute('tabindex', mode==='mobile' ?'0':'-1');
-  applyModeVars(); render(); saveState();
-}
-
-/* === الوضع الداكن === */
+/* ===== الوضع الداكن ===== */
 function setDark(on){ state.dark=!!on; document.body.classList.toggle('dark', state.dark);
   darkBtn.setAttribute('aria-pressed', String(state.dark));
   darkBtn.textContent = state.dark ? 'الوضع الفاتح' : 'الوضع الداكن';
   saveState();
 }
 
-/* === تقييمات بالعدد === */
+/* ===== تقييمات ===== */
 function evalTitleByCount(n){
   if (n >= TITLE_CHAR_LIMIT) return {text:'طويل', cls:'bad'};
   if (n < 30)  return {text:'قصير جدًا', cls:'warn'};
@@ -323,11 +304,9 @@ function evalDescByCount(n){
   return {text:'مناسب', cls:'ok'};
 }
 
-/* === العرض === */
+/* ===== العرض ===== */
 function render(){
-  const m = state.mode==='desktop'? MODES.desktop : MODES.mobile;
-
-  // Title: قصّ بالعدد + منع السطر الثاني
+  // Title (قصّ بالعدد ومنع السطر الثاني)
   const titleRaw = (titleInput.value || '').replace(/\s+/g,' ').trimStart();
   const tCount = charCount(titleRaw);
   const tEval = evalTitleByCount(tCount);
@@ -336,36 +315,36 @@ function render(){
   const shownTitle = tCount > TITLE_CHAR_LIMIT ? truncateByChars(titleRaw, TITLE_CHAR_LIMIT) : (titleRaw || 'عنوان الصفحة — مثال');
   pTitle.textContent = shownTitle;
 
-  // URL (توليد المسار من العنوان تلقائيًا طالما auto مفعّل)
+  // URL (توليد تلقائي للمسار طالما لم يُعدّل الحقل يدويًا)
   if (urlAutoMode){
-    const existing = urlInput.value.trim();
-    const domMatch = existing.match(/^https?:\/\/([^\/]+)|^([^\/:]+)(?=\/|$)/i);
-    const domainPart = domMatch ? (domMatch[1] || domMatch[2]) : 'yourdomain.com';
+    const dom = extractDomain(urlInput.value || 'yourdomain.com');
     const slug = slugFromTitle(titleRaw || 'عنوان-افتراضي');
-    urlInput.value = composeUrl(domainPart, slug);
+    urlInput.value = composeUrl(dom, slug);
   }
-  const rawUrl = urlInput.value;
-  const clean = cleanUrlForDisplay(rawUrl || 'yourdomain.com/slug');
-  const short = midTruncateToFit(clean, m.urlW, FONTS.url);
-  pUrl.textContent = short || 'yourdomain.com';
+  const clean = cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug');
+  const urlLimit = Math.min(cssVarPx('--url-w'), pUrl.clientWidth || 9999);
+  pUrl.textContent = midTruncateToFit(clean, urlLimit, FONTS.url);
   urlCountEl.textContent = `${charCount(urlInput.value)} حرف`;
   urlState.textContent = '—'; urlState.className='state';
 
-  // Description: التفاف سطرين بالبكسل
+  // Description: اللفّ بسطرين بناءً على عرض العنصر الفعلي
   const descRaw = (descInput.value || '');
   const dCount = charCount(descRaw);
   const dEval = evalDescByCount(dCount);
   descCountEl.textContent = `${dCount} حرف`;
   descState.textContent = dEval.text; descState.className='state '+dEval.cls;
 
+  const descLimit = Math.min(cssVarPx('--desc-w'), pDesc.clientWidth || cssVarPx('--desc-w'));
   const dRes = wrapDescriptionTwoLines(
     descRaw.trim() || 'هذا الوصف يظهر في سطرين كحد أقصى. إذا طال أكثر فسيتم قصّه تلقائيًا مع إضافة علامة الحذف…',
-    m.descW, FONTS.desc
+    descLimit, FONTS.desc
   );
   pDesc.textContent = (dRes.lines[0] + (dRes.lines[1]? '\n'+dRes.lines[1] : '')).trim();
+
+  updateLimitsText();
 }
 
-/* === نسخ === */
+/* ===== نسخ ===== */
 async function copyText(s){
   try{
     if (navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(s); }
@@ -373,18 +352,16 @@ async function copyText(s){
   }catch(e){}
 }
 
-/* === Debounce === */
+/* ===== Debounce ===== */
 function debounce(fn,ms=150){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms);} }
 const onInput = debounce(()=>{ render(); saveState(); },150);
 
-/* === تهيئة === */
+/* ===== تهيئة ===== */
 (function init(){
   loadState();
   if (state.dark) setDark(true);
-  if (state.mode!=='desktop' && state.mode!=='mobile') state.mode='desktop';
-  modeDesktop.checked=state.mode==='desktop'; modeMobile.checked=state.mode==='mobile';
-  applyModeVars();
 
+  // استعادة النصوص أو تعبئة افتراضيًا
   if (state.title || state.desc || state.url){
     titleInput.value=state.title||'';
     descInput.value =state.desc ||'';
@@ -397,6 +374,7 @@ const onInput = debounce(()=>{ render(); saveState(); },150);
     descInput.value  = defDesc;
     urlInput.value   = 'https://yourdomain.com/'+slug;
   }
+
   render();
 
   // إدخال
@@ -404,11 +382,8 @@ const onInput = debounce(()=>{ render(); saveState(); },150);
   descInput .addEventListener('input', onInput);
   urlInput  .addEventListener('input', ()=>{ urlAutoMode = false; onInput(); });
 
-  // تبديل الوضع
-  modeDesktop.addEventListener('change', ()=>setMode('desktop'));
-  modeMobile .addEventListener('change', ()=>setMode('mobile'));
-  modeDesktopLabel.addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ setMode('desktop'); }});
-  modeMobileLabel .addEventListener('keydown',(e)=>{ if(e.key===' '||e.key==='Enter'){ setMode('mobile'); }});
+  // إعادة الحساب عند تغيير حجم الشاشة/تدوير الجوال
+  window.addEventListener('resize', debounce(()=>{ render(); }, 150));
 
   // الوضع الداكن
   darkBtn.addEventListener('click', ()=>setDark(!state.dark));
