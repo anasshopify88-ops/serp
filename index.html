@@ -257,7 +257,7 @@ titleState.className = 'state ' + ((charCount(titleRaw)>TITLE_MAX)?'bad':(charCo
   const dRaw = descInput.value || '';
   descCountEl.textContent = `${charCount(dRaw)} حرف`;
   descState.textContent = (charCount(dRaw)>META_MAX)?'طويل':(charCount(dRaw)<META_MIN?'قصير':'مناسب');
-  descState.className = 'state ' + ((charCount(dRaw)>160)?'bad':(charCount(dRaw)<80)?'warn':'ok');
+descState.className = 'state ' + ((charCount(dRaw)>META_MAX)?'bad':(charCount(dRaw)<META_MIN)?'warn':'ok');
 
   if (isMobile){
     pDesc.textContent = dRaw.trim();  // عرض كامل على الجوال
