@@ -240,7 +240,7 @@ function render(){
 
   titleCountEl.textContent = `${charCount(titleRaw)} حرف`;
   titleState.textContent = (charCount(titleRaw)>TITLE_MAX)?'طويل':(charCount(titleRaw)<TITLE_MIN?'قصير':'مناسب');
-  titleState.className = 'state ' + ((charCount(titleRaw)>60)?'bad':(charCount(titleRaw)<30)?'warn':'ok');
+titleState.className = 'state ' + ((charCount(titleRaw)>TITLE_MAX)?'bad':(charCount(titleRaw)<TITLE_MIN)?'warn':'ok');
   pTitle.textContent = enforcedTitle || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
 
   const dom = extractDomain(urlInput.value || 'yourdomain.com');
