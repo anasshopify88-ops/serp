@@ -18,42 +18,52 @@
   @media (min-width:1280px){ body{font-size:16px} }
 
   .wrap{max-width:1200px;margin:24px auto;padding:0 12px 40px;width:100%}
-  header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
-  .brand{display:flex;align-items:center;gap:12px}
-  .avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow)}
+  header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap;min-width:0}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  /* ✅ الصورة تظهر كاملة داخل الدائرة */
+  .avatar{width:72px;height:72px;border-radius:50%;object-fit:contain;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow)}
   .tool-name{font-weight:800;font-size:clamp(18px,2.2vw,28px);line-height:1.2;white-space:nowrap}
-  .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
   .toggle,.nav-btn{padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
   .nav-btn.home{background:#000;color:#fff;border-color:#000}
 
-  /* === التخطيط المطابق للصورة === */
+  /* تخطيط الشبكة (الديسكتوب كما هو) */
   .row{
-    display:grid; gap:16px;
-    align-items:stretch;                           /* تمديد العناصر لارتفاع الصف */
+    display:grid; gap:16px; align-items:stretch;
     grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr);
-    grid-template-rows: auto 1fr;                  /* صف علوي للتوليد، وسفلي للمعاينة */
+    grid-template-rows: auto 1fr;
     grid-template-areas:
-      "fields ai"                                  /* الحقول يسار، التوليد يمين (أعلى) */
-      "fields preview";                            /* الحقول تمتد صفّين، المعاينة أسفل التوليد */
+      "fields ai"
+      "fields preview";
+    min-width:0;
   }
+  .row > *{min-width:0}
+
+  /* الجوال — فقط ترتيب الهيدر ومنع أي تمدد أفقي */
   @media (max-width:1024px){
     .row{
       grid-template-columns:1fr;
       grid-template-rows:auto auto auto;
       grid-template-areas:
-        "ai"                                       /* المعاينة مباشرة تحت التوليد */
+        "ai"
         "preview"
         "fields";
       gap:12px;
     }
   }
+  @media (max-width:640px){
+    header{flex-direction:column;justify-content:flex-start;gap:10px;text-align:center}
+    .brand{width:100%;flex-direction:column;gap:10px;align-items:center}
+    .avatar{width:96px;height:96px}         /* أكبر على الجوال */
+    .tool-name{white-space:normal}          /* يلفّ العنوان وما يسبب تمدد */
+    .header-actions{width:100%;justify-content:center}
+  }
 
   .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
   .card{padding:16px}
-  .preview{padding:16px; margin:0; height:100%}    /* تمتد لتساوي ارتفاع الصف = مساواة النهاية */
+  .preview{padding:16px; margin:0; height:100%}
   @media (max-width:1024px){ .preview{height:auto} }
 
-  /* إزالة أي فراغ سفلي زائد */
   .fields .field:last-child{ margin-bottom: 0 }
 
   .ai-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
@@ -96,7 +106,7 @@
     </div>
     <div class="header-actions" role="group" aria-label="خيارات التنقل">
       <button id="backBtn" class="nav-btn" title="رجوع">رجوع</button>
-      <button id="homeBtn" class="nav-btn home" title="الرئيسية">الرئيسية</button>
+      <a id="homeBtn" class="nav-btn home" href="https://anasrashed.com" title="الرئيسية">الرئيسية</a>
       <button id="darkBtn" class="toggle" aria-pressed="false" aria-label="تبديل الوضع الداكن">الوضع الداكن</button>
     </div>
   </header>
@@ -110,7 +120,6 @@
           <div class="meters">
             <span class="meter-pill" id="titleCount">0 حرف</span>
             <span class="state" id="titleState">—</span>
-            <button id="btnTrimTitle" class="nav-btn" style="padding:6px 10px">قص ≤60</button>
           </div>
         </div>
         <input id="titleInput" type="text" placeholder="40–60 حرف">
@@ -122,7 +131,6 @@
           <div class="meters">
             <span class="meter-pill" id="descCount">0 حرف</span>
             <span class="state" id="descState">—</span>
-            <button id="btnClampDesc" class="nav-btn" style="padding:6px 10px">قص ≤160</button>
           </div>
         </div>
         <textarea id="descInput" placeholder="120–160 حرف"></textarea>
@@ -194,7 +202,6 @@ const titleCountEl=$('#titleCount'), titleState=$('#titleState');
 const descCountEl=$('#descCount'), descState=$('#descState');
 const urlCountEl=$('#urlCount'), urlState=$('#urlState');
 const rawInput=$('#rawInput'), generateBtn=$('#generateBtn'), clearAllBtn=$('#clearAllBtn');
-const btnTrimTitle=$('#btnTrimTitle'), btnClampDesc=$('#btnClampDesc');
 
 function setStatus(kind, msg){
   statusEl.className = 'status ' + (kind||'') + (msg?'':' hidden');
@@ -240,7 +247,15 @@ function render(){
   const fits=(curr,tok)=>measurePx(curr+tok, FONTS.desc)<=linePx;
   for (const tok of tokens){
     if (fits(lines[iLine], tok)){ lines[iLine]+=tok; }
-    else { iLine++; if (iLine>1){ let second = lines[1].trimEnd(); while (second && measurePx(second+ELLIPSIS,FONTS.desc)>linePx){ second = second.replace(/\s*\S+$/,''); } lines[1]=second+(second?ELLIPSIS:''); break; } else { if (measurePx(tok,FONTS.desc)<=linePx){ lines[iLine]=tok.replace(/^\s+/,''); } else { let piece=''; for (let j=0;j<tok.length;j++){ const c=piece+tok[j]; if (measurePx(c,FONTS.desc)<=linePx) piece=c; else break; } lines[iLine]=piece; } } }
+    else { iLine++; if (iLine>1){
+        let second = lines[1].trimEnd();
+        while (second && measurePx(second+ELLIPSIS,FONTS.desc)>linePx){ second = second.replace(/\s*\S+$/,''); }
+        lines[1]=second+(second?ELLIPSIS:''); break;
+      } else {
+        if (measurePx(tok,FONTS.desc)<=linePx){ lines[iLine]=tok.replace(/^\s+/,''); }
+        else { let piece=''; for (let j=0;j<tok.length;j++){ const c=piece+tok[j]; if (measurePx(c,FONTS.desc)<=linePx) piece=c; else break; } lines[iLine]=piece; }
+      }
+    }
   }
   pDesc.textContent = (lines[0] + (lines[1]? '\n'+lines[1] : '')).trim();
 }
@@ -309,23 +324,18 @@ async function generateFromRaw(){
   titleInput.addEventListener('input', render);
   descInput .addEventListener('input', render);
   urlInput  .addEventListener('input', render);
-  document.querySelector('#btnTrimTitle').addEventListener('click', ()=>{ if (charCount(titleInput.value)>TITLE_MAX) titleInput.value = truncateByChars(titleInput.value, TITLE_MAX); render(); });
-  document.querySelector('#btnClampDesc').addEventListener('click', ()=>{ if (charCount(descInput.value)>META_MAX) descInput.value = truncateByChars(descInput.value, META_MAX); render(); });
   document.querySelector('#clearBtn').addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; render(); });
   document.querySelector('#clearAllBtn').addEventListener('click', ()=>{ rawInput.value=''; document.querySelector('#wordInfo').textContent='0 كلمة'; });
   document.querySelector('#copyTitleBtn').addEventListener('click', ()=>navigator.clipboard.writeText(titleInput.value));
   document.querySelector('#copyDescBtn') .addEventListener('click', ()=>navigator.clipboard.writeText(descInput.value));
   document.querySelector('#copyPreviewBtn').addEventListener('click', ()=>navigator.clipboard.writeText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n')));
   document.querySelector('#backBtn').addEventListener('click', ()=>history.back());
-document.querySelector('#homeBtn').addEventListener('click', ()=>{ window.location.href = 'https://anasrashed.com'; });
-
   document.querySelector('#darkBtn').addEventListener('click', ()=>{
     document.body.classList.toggle('dark');
     const on=document.body.classList.contains('dark');
     document.querySelector('#darkBtn').setAttribute('aria-pressed', on);
     document.querySelector('#darkBtn').textContent = on ? 'الوضع الفاتح' : 'الوضع الداكن';
   });
-
   document.querySelector('#generateBtn').addEventListener('click', ()=>{
     if (!rawInput.value.trim()){
       rawInput.value = [titleInput.value, descInput.value].join('\n');
