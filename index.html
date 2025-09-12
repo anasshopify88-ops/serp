@@ -197,7 +197,7 @@ const ENDPOINTS = { gen: API_BASE + "/api/generate", ping: API_BASE + "/ping", d
 
 (function(){ const c=document.createElement('canvas'),x=c.getContext('2d'); window.measurePx=(t,f)=>{x.font=f; return x.measureText(t==null?'':String(t)).width}; })();
 const FONTS = { title:'800 22px Arial, Helvetica, sans-serif', desc :'normal 15px Arial, Helvetica, sans-serif', url  :'normal 14px Arial, Helvetica, sans-serif' };
-const ELLIPSIS='…', TITLE_MIN=40, TITLE_MAX=60, META_MIN=120, META_MAX=160;
+const ELLIPSIS='…', TITLE_MIN=40, TITLE_MAX=60, META_MIN=100, META_MAX=160;
 const $=s=>document.querySelector(s);
 
 const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
