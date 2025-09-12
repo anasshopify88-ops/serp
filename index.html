@@ -26,18 +26,32 @@
   .toggle,.nav-btn{padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);cursor:pointer}
   .nav-btn.home{background:#000;color:#fff;border-color:#000}
 
-  /* تخطيط الشبكة */
-  .row{display:grid; gap:16px; align-items:start; grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr); grid-template-areas: "ai preview" "fields preview";}
+  /* === التخطيط المطابق للصورة === */
+  .row{
+    display:grid; gap:16px;
+    align-items:stretch;                           /* تمديد العناصر لارتفاع الصف */
+    grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr);
+    grid-template-rows: auto 1fr;                  /* صف علوي للتوليد، وسفلي للمعاينة */
+    grid-template-areas:
+      "fields ai"                                  /* الحقول يسار، التوليد يمين (أعلى) */
+      "fields preview";                            /* الحقول تمتد صفّين، المعاينة أسفل التوليد */
+  }
   @media (max-width:1024px){
-    .row{grid-template-columns:1fr;grid-template-areas:"ai" "fields" "preview"; gap:12px}
+    .row{
+      grid-template-columns:1fr;
+      grid-template-rows:auto auto auto;
+      grid-template-areas:
+        "ai"                                       /* المعاينة مباشرة تحت التوليد */
+        "preview"
+        "fields";
+      gap:12px;
+    }
   }
 
   .card,.preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
   .card{padding:16px}
-  .preview{padding:16px; position:sticky; top:16px; align-self:start; margin:0}
-  @media (max-width:1024px){
-    .preview{ position:static; top:auto }
-  }
+  .preview{padding:16px; margin:0; height:100%}    /* تمتد لتساوي ارتفاع الصف = مساواة النهاية */
+  @media (max-width:1024px){ .preview{height:auto} }
 
   /* إزالة أي فراغ سفلي زائد */
   .fields .field:last-child{ margin-bottom: 0 }
@@ -88,24 +102,7 @@
   </header>
 
   <div class="row">
-    <section class="card" id="sec-ai" style="grid-area:ai">
-      <div class="ai-head">
-        <h2 style="margin:0;font-size:16px">إنشاء العنوان والوصف والرابط تلقائيًا</h2>
-        <div class="ai-actions">
-          <button id="generateBtn" class="primary">توليد</button>
-          <button id="clearAllBtn">مسح الكل</button>
-        </div>
-      </div>
-      <p class="hint">الصق وصف المنتج/الخدمة/المقال (حتى 12000 حرف). لا يوجد توليد محلي — API فقط.</p>
-      <textarea id="rawInput" placeholder="الصق وصفًا تفصيليًا هنا..."></textarea>
-      <div class="chips">
-        <span class="chip" id="wordInfo">0 كلمة</span>
-        <span class="chip" id="aiMode">وضع: API</span>
-      </div>
-      <div id="status" class="status hidden"></div>
-      <div id="aiErr" class="err" hidden></div>
-    </section>
-
+    <!-- الحقول: تمتد صفّين (يسار) -->
     <section class="card fields" id="sec-fields" style="grid-area:fields">
       <div class="field">
         <div class="label">
@@ -150,6 +147,26 @@
       </div>
     </section>
 
+    <!-- يمين صف علوي: توليد -->
+    <section class="card" id="sec-ai" style="grid-area:ai">
+      <div class="ai-head">
+        <h2 style="margin:0;font-size:16px">إنشاء العنوان والوصف والرابط تلقائيًا</h2>
+        <div class="ai-actions">
+          <button id="generateBtn" class="primary">توليد</button>
+          <button id="clearAllBtn">مسح الكل</button>
+        </div>
+      </div>
+      <p class="hint">الصق وصف المنتج/الخدمة/المقال (حتى 12000 حرف). لا يوجد توليد محلي — API فقط.</p>
+      <textarea id="rawInput" placeholder="الصق وصفًا تفصيليًا هنا..."></textarea>
+      <div class="chips">
+        <span class="chip" id="wordInfo">0 كلمة</span>
+        <span class="chip" id="aiMode">وضع: API</span>
+      </div>
+      <div id="status" class="status hidden"></div>
+      <div id="aiErr" class="err" hidden></div>
+    </section>
+
+    <!-- يمين صف سفلي: المعاينة -->
     <section class="preview" id="sec-preview" style="grid-area:preview">
       <div class="serp" id="serp">
         <h3 class="title" id="pTitle">أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد</h3>
@@ -201,8 +218,8 @@ function midTruncateToFit(str, limitPx, font){
 function render(){
   const titleRaw = normalizeWS(titleInput.value).trimStart();
   const enforcedTitle = (charCount(titleRaw) > TITLE_MAX) ? truncateByChars(titleRaw, TITLE_MAX) : titleRaw;
-titleCountEl.textContent = `${charCount(titleRaw)} حرف`;
-titleState.textContent = (charCount(titleRaw)>TITLE_MAX)?'طويل':(charCount(titleRaw)<TITLE_MIN?'قصير':'مناسب');
+  titleCountEl.textContent = `${charCount(titleRaw)} حرف`;
+  titleState.textContent = (charCount(titleRaw)>TITLE_MAX)?'طويل':(charCount(titleRaw)<TITLE_MIN?'قصير':'مناسب');
   titleState.className = 'state ' + ((charCount(titleRaw)>60)?'bad':(charCount(titleRaw)<30)?'warn':'ok');
   pTitle.textContent = enforcedTitle || 'أداة محاكاة مجانية لنتائج بحث جوجل (SERP) من أنس راشد';
 
@@ -213,8 +230,8 @@ titleState.textContent = (charCount(titleRaw)>TITLE_MAX)?'طويل':(charCount(t
   urlCountEl.textContent = `${charCount(urlInput.value)} حرف`; urlState.textContent='—'; urlState.className='state';
 
   const dRaw = descInput.value || '';
-descCountEl.textContent = `${charCount(dRaw)} حرف`;
-descState.textContent = (charCount(dRaw)>META_MAX)?'طويل':(charCount(dRaw)<META_MIN?'قصير':'مناسب');
+  descCountEl.textContent = `${charCount(dRaw)} حرف`;
+  descState.textContent = (charCount(dRaw)>META_MAX)?'طويل':(charCount(dRaw)<META_MIN?'قصير':'مناسب');
   descState.className = 'state ' + ((charCount(dRaw)>160)?'bad':(charCount(dRaw)<80)?'warn':'ok');
 
   const linePx = availableWidth(pDesc);
@@ -260,7 +277,6 @@ async function generateFromRaw(){
     if (!out || !out.title || !out.meta){
       throw new Error('استجابة غير صالحة من الخادم.');
     }
-    // قصّ صارم هنا أيضًا (ازدواجية اطمئنان)
     const title = (charCount(out.title)>TITLE_MAX) ? truncateByChars(out.title, TITLE_MAX) : out.title;
     const meta  = (charCount(out.meta )>META_MAX ) ? truncateByChars(out.meta , META_MAX ) : out.meta;
 
