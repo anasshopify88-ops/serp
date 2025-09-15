@@ -128,8 +128,9 @@
   .meters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
   .meter-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:700}
 
-  /* راس قسم التوليد */
-  .ai-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  /* راس قسم التوليد (لم يعد مستخدمًا بصريًا بعد النقل) */
+  .ai-head{display:none}
+
   .ai-actions{display:flex;gap:8px;flex-wrap:wrap}
   /* ✅ جعل "توليد" و"مسح الكل" نفس الحجم */
   .ai-actions button{flex:1 1 0; min-width:140px}
@@ -138,7 +139,7 @@
     width:100%;max-width:100%;min-height:160px;max-height:48vh;resize:vertical;
     padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--text)
   }
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .chips{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px}
   .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px}
 
   .hint{font-size:12px;color:var(--muted)}
@@ -208,9 +209,7 @@
             <div class="s-item"><a href="https://smg.anasrashed.com" target="_blank" rel="noopener">أداة منشئ خريطة الموقع</a></div>
             <div class="s-item"><a href="https://anasrashed.com/blog" target="_blank" rel="noopener">تعلم أكثر</a></div>
             <div class="s-item"><a href="https://anasrashed.com/%D8%AA%D9%88%D8%AB%D9%8A%D9%82-%D8%A7%D9%84%D8%AA%D8%AC%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D8%A5%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A%D8%A9/page-1494027497" target="_blank" rel="noopener">توثيق التجارة الإلكترونية</a></div>
-            
             <div class="s-item"><a href="https://contact.anasrashed.com" target="_blank" rel="noopener">تواصل معي</a></div>
-            
           </div>
           <!-- تم إزالة الشعار من السايدبار بعد نقله لصف العنوان -->
         </div>
@@ -221,15 +220,7 @@
         <div class="row">
           <!-- يسار: الحقول -->
           <section class="card section fields" id="sec-fields" style="grid-area:fields">
-            <div class="field">
-              <div class="label"><label for="intentInput">نوع الصفحة</label></div>
-              <select id="intentInput">
-                <option value="article">مقالة</option>
-                <option value="product">منتج</option>
-                <option value="service">خدمة</option>
-                <option value="home">صفحة رئيسية</option>
-              </select>
-            </div>
+            <!-- تمت إزالة "نوع الصفحة" من هنا ونُقل إلى أعلى منطقة التوليد -->
             <div class="switches">
               <label><input type="checkbox" id="autoPolish" checked> تلميع تلقائي بعد التوليد</label>
             </div>
@@ -281,18 +272,31 @@
 
           <!-- يمين علوي: توليد -->
           <section class="card section" id="sec-ai" style="grid-area:ai">
-            <div class="ai-head">              <div class="ai-actions">
+            <!-- ✅ (2) "نوع الصفحة" أعلى نص الإرشاد -->
+            <div class="field" style="margin-bottom:8px">
+              <div class="label"><label for="intentInput">نوع الصفحة</label></div>
+              <select id="intentInput">
+                <option value="article">مقالة</option>
+                <option value="product">منتج</option>
+                <option value="service">خدمة</option>
+                <option value="home">صفحة رئيسية</option>
+              </select>
+            </div>
+
+            <p class="hint">الصق الوصف (حتى 12000 حرف) وخلي الذكاء الإصطناعي يكمل الباقي</p>
+            <textarea id="rawInput" placeholder="الصق وصفًا تفصيليًا هنا..."></textarea>
+
+            <!-- ✅ (1) زرّا التوليد ومسح الكل بجانب عداد الكلمات -->
+            <div class="chips">
+              <span class="chip" id="wordInfo">0 كلمة</span>
+              <div class="ai-actions">
                 <button id="generateBtn" class="primary">توليد</button>
                 <button id="clearAllBtn">مسح الكل</button>
               </div>
-            </div>
-            <p class="hint">الصق الوصف (حتى 12000 حرف) وخلي الذكاء الإصطناعي يكمل الباقي</p>
-            <textarea id="rawInput" placeholder="الصق وصفًا تفصيليًا هنا..."></textarea>
-            <div class="chips">
-              <span class="chip" id="wordInfo">0 كلمة</span>
               <span class="chip" id="aiMode" style="display:none">وضع: API</span>
               <span class="chip" id="qualityChip" style="display:none">الجودة: —</span>
             </div>
+
             <div id="status" class="status hidden"></div>
             <div id="aiErr" class="err" hidden></div>
           </section>
@@ -542,7 +546,7 @@ async function generateFromRaw(){
     title = title.replace(/\s*(?:…|\.{3,})\s*$/u,'');
 
     const autoPolish=document.querySelector('#autoPolish');
-    if (autoPolish.checked){
+    if (autoPolish && autoPolish.checked){
       const beforeScore = scoreTitle(title);
       const tPolished = polishTitle(title);
       const afterScore = scoreTitle(tPolished);
@@ -595,7 +599,7 @@ async function generateFromRaw(){
   titleInput.addEventListener('input', render);
   descInput .addEventListener('input', render);
   urlInput  .addEventListener('input', render);
-  document.querySelector('#autoPolish').addEventListener('change', ()=>setStatus('', ''));
+  const ap=document.querySelector('#autoPolish'); if (ap) ap.addEventListener('change', ()=>setStatus('', ''));
 
   document.querySelector('#clearBtn').addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; render(); });
   document.querySelector('#clearAllBtn').addEventListener('click', ()=>{ rawInput.value=''; document.querySelector('#wordInfo').textContent='0 كلمة'; setStatus('', ''); });
