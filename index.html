@@ -11,7 +11,7 @@
 
 <style>
   :root{
-    /* ثيم موحّد (مثل الأداة الأولى) */
+    /* ثيم موحّد */
     --bg:#f7f8fb; --bg-2:#f1f5fb; --card:#ffffff; --text:#0c1424; --muted:#5b6472; --accent:#2563eb;
     --ok:#15803d; --warn:#d97706; --error:#dc2626; --border:#e6e9f2; --shadow:0 6px 16px rgba(0,0,0,.08);
     --radius:16px; --radius-sm:12px;
@@ -24,12 +24,6 @@
 
     /* ألوان SERP */
     --g-blue:#1a0dab; --g-url:#3c4043; --g-desc:#4d5156;
-  }
-
-  /* وضع داكن اختياري */
-  body.dark{
-    --bg:#0b1220; --bg-2:#0b1220; --card:#0f172a; --text:#e5e7eb; --muted:#9aa4b2; --border:#1f2a44;
-    --g-blue:#8ab4f8; --g-url:#bdc1c6; --g-desc:#bdc1c6; --shadow:0 6px 20px rgba(0,0,0,.45);
   }
 
   *{box-sizing:border-box}
@@ -51,31 +45,40 @@
     font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;
   }
   .btn:hover{transform:translateY(-2px); border-color:#cbd5e1}
-  .btn.primary{background:linear-gradient(135deg,#2563eb,#8b5cf6); color:#fff; border-color:transparent}
   .btn.home{background:#000; color:#fff; border-color:#000}
   .btn:disabled{opacity:.6; cursor:not-allowed}
+
+  /* زر تواصل معي في التوب بار */
+  .btn.contactTop{
+    background: var(--accent);
+    border-color: var(--accent);
+    color:#fff;
+    justify-content:center;
+  }
+  .btn.contactTop:hover{
+    background: var(--accent);
+    border-color: var(--accent);
+    color:#fff;
+  }
 
   /* بطاقة عنوان */
   .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow)}
   .titleRow{display:flex;align-items:center;gap:10px;justify-content:space-between}
   h1{margin:0;font-size:clamp(18px,2.2vw,24px);font-weight:800;letter-spacing:.2px}
   .sub{margin-top:6px;color:var(--muted);font-size:var(--fs-sm)}
-  /* الشعار المنقول بجانب العنوان مع الحفاظ على الحجم */
   .logo{width:100%; max-width:180px; align-self:center; object-fit:contain; object-position:center; background:#fff; border-radius:12px; border:1px solid var(--border); padding:8px}
   .title-logo{width:180px; max-width:180px; align-self:center}
 
-  /* التخطيط العام: سايدبار يسار + الأداة يمين */
+  /* التخطيط العام */
   .layout{
     display:grid;
     grid-template-columns: var(--sidebar-w) 1fr;
     gap:14px;
-    align-items:stretch; /* يساوي الارتفاع */
+    align-items:stretch;
   }
 
-  /* السايدبار يساوي ارتفاع الأداة */
-  #sidePanel{
-    display:flex; height:100%; min-height:0; overflow:hidden;
-  }
+  /* السايدبار */
+  #sidePanel{display:flex; height:100%; min-height:0; overflow:hidden;}
   @media (min-width:981px){ #sidePanel{ contain:size; } }
   .sidebar-card{
     flex:1 1 auto; height:100%;
@@ -89,12 +92,16 @@
     box-shadow:0 4px 12px rgba(15,23,42,.05); font-size:13px;
   }
   .s-item a:hover{transform:translateY(-2px); border-color:#cbd5e1; box-shadow:0 8px 18px rgba(15,23,42,.08)}
-  .s-caption{color:var(--muted); font-size:11.5px; margin-top:-2px; align-self:center}
 
-  /* يمين: نفس ترتيب الأداة الأصلي */
+  /* نص بدون رابط بنفس ستايل الروابط */
+  .s-text{
+    display:block; padding:8px 10px; border:1px solid var(--border); border-radius:12px; background:#fff;
+    color:#0f172a; font-weight:600; box-shadow:0 4px 12px rgba(15,23,42,.05); font-size:13px;
+  }
+
+  /* يمين: الأداة */
   #toolBox{display:block; min-height:0}
 
-  /* شبكة الأداة الأصلية */
   .row{
     display:grid; gap:16px; align-items:stretch;
     grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr);
@@ -110,12 +117,10 @@
       grid-template-areas:"ai" "preview" "fields"; gap:12px; }
   }
 
-  /* بطاقات أقسام الأداة */
   .card.section{padding:16px}
   .preview{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; margin:0; height:100%}
   @media (max-width:1024px){ .preview{height:auto} }
 
-  /* الحقول */
   .fields .field{margin-bottom:14px}
   .fields .field:last-child{ margin-bottom: 0 }
   .label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-weight:700;font-size:14px}
@@ -128,11 +133,7 @@
   .meters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
   .meter-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:700}
 
-  /* راس قسم التوليد (لم يعد مستخدمًا بصريًا بعد النقل) */
-  .ai-head{display:none}
-
   .ai-actions{display:flex;gap:8px;flex-wrap:wrap}
-  /* ✅ جعل "توليد" و"مسح الكل" نفس الحجم */
   .ai-actions button{flex:1 1 0; min-width:140px}
 
   textarea#rawInput{
@@ -152,7 +153,6 @@
   button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
   button.loading{opacity:.7;pointer-events:none}
 
-  /* معاينة SERP */
   .serp{display:flex;flex-direction:column;gap:3px;width:100%; overflow-wrap:anywhere;word-break:break-word}
   .serp .title{font:800 clamp(18px,2.2vw,22px)/1.3 Cairo, Arial, Helvetica, sans-serif;color:var(--g-blue);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .serp .title.full{white-space:normal;overflow:visible;text-overflow:clip}
@@ -163,7 +163,6 @@
   }
   .foot-help{margin-top:10px;font-size:12px;color:var(--muted)}
 
-  /* استجابة */
   @media (max-width:980px){
     .layout{grid-template-columns:1fr}
     #sidePanel{height:auto; overflow:visible;}
@@ -177,10 +176,12 @@
     <div class="topbar">
       <button class="btn" id="backBtn">رجوع</button>
       <a class="btn home" id="homeBtn" href="https://anasrashed.com" rel="noopener">الرئيسية</a>
-      <button class="btn" id="darkBtn" aria-pressed="false" aria-label="تبديل الوضع">الوضع الداكن</button>
+
+      <!-- ✅ تواصل معي بدل زر الوضع الداكن -->
+      <a class="btn contactTop" id="contactTopBtn" href="https://contact.anasrashed.com" target="_blank" rel="noopener">تواصل معي</a>
     </div>
 
-    <!-- عنوان الأداة (الشعار منقول إلى يسار العنوان) -->
+    <!-- عنوان الأداة -->
     <div class="card">
       <div class="titleRow">
         <div>
@@ -192,40 +193,56 @@
       </div>
     </div>
 
-    <!-- التخطيط: سايدبار + الأداة بنفس ترتيبها الأصلي -->
+    <!-- التخطيط -->
     <div class="layout" style="margin-top:12px">
-      <!-- العمود الأيسر (الصورة + الروابط) -->
+      <!-- السايدبار -->
       <aside id="sidePanel">
         <div class="card sidebar-card">
           <img class="avatar" src="https://i.imgur.com/B3UkEQ0.jpg" alt="صورتي" referrerpolicy="no-referrer"
                onerror="this.onerror=null; this.src='https://i.imgur.com/B3UkEQ0.png';">
+
           <div class="s-list">
             <div class="s-item"><a href="https://whoami.anasrashed.com" target="_blank" rel="noopener">من أنا؟</a></div>
-            <div class="s-item"><a href="https://anasrashed.com/wAXpVym" target="_blank" rel="noopener">دليل السيو الشامل</a></div>
-            <div class="s-item"><a href="https://anasrashed.com/eQvbbqP" target="_blank" rel="noopener">أفضل باك لينك</a></div>
-            <div class="s-item"><a href="https://anasrashed.com/NApDQYD" target="_blank" rel="noopener">حملة باك لينك شهرية</a></div>
-            <div class="s-item"><a href="https://anasrashed.com/ZqyGaBZ" target="_blank" rel="noopener">حل مشكلة خريطة الموقع للباقة بلس</a></div>
+
+            <div class="s-item">
+              <a href="https://anasrashed.gumroad.com/l/seo-book-for-ecommerce" target="_blank" rel="noopener">
+                كتاب دليل السيو الشامل
+              </a>
+            </div>
+
+            <div class="sub" style="text-align:center; font-size:18px; margin-top:10px;">
+              <b>خدماتي</b>
+            </div>
+
+            <!-- ✅ خدمات بدون روابط -->
+            <div class="s-item"><span class="s-text">تحسين سيو المتجر</span></div>
+            <div class="s-item"><span class="s-text">حملة باك لينك شهرية</span></div>
+            <div class="s-item"><span class="s-text">استخراج الكلمات المفتاحية للمنافسين</span></div>
+            <div class="s-item"><span class="s-text">تفعيل خريطة الموقع للباقة بلس</span></div>
+
+            <div class="sub" style="text-align:center; font-size:18px; margin-top:10px;">
+              <b>أدوات سيو احترافية</b>
+            </div>
+
+            <!-- ✅ الأدوات -->
             <div class="s-item"><a href="https://serp.anasrashed.com" target="_blank" rel="noopener">أداة SERP بالذكاء الإصطناعي</a></div>
             <div class="s-item"><a href="https://smg.anasrashed.com" target="_blank" rel="noopener">أداة منشئ خريطة الموقع</a></div>
-            <div class="s-item"><a href="https://anasrashed.com/blog" target="_blank" rel="noopener">تعلم أكثر</a></div>
-            <div class="s-item"><a href="https://anasrashed.com/%D8%AA%D9%88%D8%AB%D9%8A%D9%82-%D8%A7%D9%84%D8%AA%D8%AC%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D8%A5%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A%D8%A9/page-1494027497" target="_blank" rel="noopener">توثيق التجارة الإلكترونية</a></div>
-            <div class="s-item"><a href="https://contact.anasrashed.com" target="_blank" rel="noopener">تواصل معي</a></div>
+            <div class="s-item"><a href="https://keywords.anasrashed.com" target="_blank" rel="noopener">أداة الكلمات المفتاحية</a></div>
+            <div class="s-item"><a href="https://checker.anasrashed.com" target="_blank" rel="noopener">أداة فحص الموقع</a></div>
+
+            <!-- ❌ تم حذف "تواصل معي" من السايدبار (صار بالتوب بار) -->
           </div>
-          <!-- تم إزالة الشعار من السايدبار بعد نقله لصف العنوان -->
         </div>
       </aside>
 
-      <!-- يمين: الأداة بنفس ترتيبها وسلوكها -->
+      <!-- الأداة -->
       <section id="toolBox">
         <div class="row">
-          <!-- يسار: الحقول -->
           <section class="card section fields" id="sec-fields" style="grid-area:fields">
-            <!-- تمت إزالة "نوع الصفحة" من هنا ونُقل إلى أعلى منطقة التوليد -->
             <div class="switches">
               <label><input type="checkbox" id="autoPolish" checked> تلميع تلقائي بعد التوليد</label>
             </div>
 
-            <!-- العنوان -->
             <div class="field">
               <div class="label">
                 <label for="titleInput">العنوان (Title)</label>
@@ -238,7 +255,6 @@
               <input id="titleInput" type="text" placeholder="مُوجَّه للضغط – يُفضّل ≤ 60 حرفًا / 580px">
             </div>
 
-            <!-- الوصف -->
             <div class="field">
               <div class="label">
                 <label for="descInput">الوصف (Meta)</label>
@@ -250,7 +266,6 @@
               <textarea id="descInput" placeholder="120–160 حرف | فائدة + CTA خفيف | بدون حشو"></textarea>
             </div>
 
-            <!-- الرابط -->
             <div class="field">
               <div class="label">
                 <label for="urlInput">الرابط (URL)</label>
@@ -270,9 +285,7 @@
             </div>
           </section>
 
-          <!-- يمين علوي: توليد -->
           <section class="card section" id="sec-ai" style="grid-area:ai">
-            <!-- ✅ (2) "نوع الصفحة" أعلى نص الإرشاد -->
             <div class="field" style="margin-bottom:8px">
               <div class="label"><label for="intentInput">نوع الصفحة</label></div>
               <select id="intentInput">
@@ -286,7 +299,6 @@
             <p class="hint">الصق الوصف (حتى 12000 حرف) وخلي الذكاء الإصطناعي يكمل الباقي</p>
             <textarea id="rawInput" placeholder="الصق وصفًا تفصيليًا هنا..."></textarea>
 
-            <!-- ✅ (1) زرّا التوليد ومسح الكل بجانب عداد الكلمات -->
             <div class="chips">
               <span class="chip" id="wordInfo">0 كلمة</span>
               <div class="ai-actions">
@@ -301,7 +313,6 @@
             <div id="aiErr" class="err" hidden></div>
           </section>
 
-          <!-- يمين سفلي: المعاينة -->
           <section class="preview" id="sec-preview" style="grid-area:preview">
             <div class="serp" id="serp">
               <h3 class="title" id="pTitle">أداة محاكاة مجانية لنتائج بحث جوجل (SERP)</h3>
@@ -339,31 +350,44 @@ const INTENT_GUIDE = {
 };
 
 /* قياس البكسل */
-(function(){ const c=document.createElement('canvas'),x=c.getContext('2d'); window.measurePx=(t,f)=>{x.font=f; return x.measureText(t==null?'':String(t)).width}; })();
-const FONTS = { title:'800 22px Cairo, Arial, Helvetica, sans-serif', desc :'normal 15px Cairo, Arial, Helvetica, sans-serif', url  :'normal 14px Cairo, Arial, Helvetica, sans-serif' };
+(function(){
+  const c=document.createElement('canvas'),x=c.getContext('2d');
+  window.measurePx=(t,f)=>{x.font=f; return x.measureText(t==null?'':String(t)).width};
+})();
+const FONTS = {
+  title:'800 22px Cairo, Arial, Helvetica, sans-serif',
+  desc :'normal 15px Cairo, Arial, Helvetica, sans-serif',
+  url  :'normal 14px Cairo, Arial, Helvetica, sans-serif'
+};
 const ELLIPSIS='…', META_MIN=120, META_MAX=160, TITLE_MAX_PX=580;
 const $=s=>document.querySelector(s);
 
 /* عناصر */
 const titleInput=$('#titleInput'), descInput=$('#descInput'), urlInput=$('#urlInput');
-const intentInput=$('#intentInput'); const autoPolish=$('#autoPolish');
 const pTitle=$('#pTitle'), pUrl=$('#pUrl'), pDesc=$('#pDesc');
-const statusEl=$('#status'), aiErr=$('#aiErr');
+const statusEl=$('#status');
 const titleCountEl=$('#titleCount'), titlePxEl=$('#titlePx'), titleState=$('#titleState');
 const descCountEl=$('#descCount'), descState=$('#descState');
 const urlCountEl=$('#urlCount'), urlState=$('#urlState');
-const rawInput=$('#rawInput'), generateBtn=$('#generateBtn'), clearAllBtn=$('#clearAllBtn');
-const qualityChip=$('#qualityChip');
+const rawInput=$('#rawInput'), qualityChip=$('#qualityChip');
 
 /* أدوات نص */
 const charCount = s => Array.from(String(s||'')).length;
 const normalizeWS = s => String(s||'').replace(/\s+/g,' ').trim();
 const cleanUrlForDisplay = raw => (raw||'').trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
-const extractDomain = raw => { if(!raw) return 'yourdomain.com'; let s=raw.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,''); s=s.split('/')[0].replace(/\/+$/,''); return s||'yourdomain.com'; };
-const slugFromTitle = t => { let s=Array.from(String(t||"")).filter(ch=>/[\u0600-\u06FFA-Za-z0-9 \-]/.test(ch)).join(''); s=s.replace(/\s+/g,'-').replace(/\-+/g,'-').replace(/^\-|\-$/g,'').toLowerCase(); return s||'صفحة-جديدة'; };
+const extractDomain = raw => {
+  if(!raw) return 'yourdomain.com';
+  let s=raw.trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'');
+  s=s.split('/')[0].replace(/\/+$/,'');
+  return s||'yourdomain.com';
+};
+const slugFromTitle = t => {
+  let s=Array.from(String(t||"")).filter(ch=>/[\u0600-\u06FFA-Za-z0-9 \-]/.test(ch)).join('');
+  s=s.replace(/\s+/g,'-').replace(/\-+/g,'-').replace(/^\-|\-$/g,'').toLowerCase();
+  return s||'صفحة-جديدة';
+};
 const availableWidth = el => Math.max(60, Math.floor(el.getBoundingClientRect().width));
 
-/* قص بالبكسل لكامل الكلمة */
 function trimToPx(text, limitPx, font){
   let t = String(text||'').trim();
   if (measurePx(t, font) <= limitPx) return t;
@@ -374,13 +398,16 @@ function trimToPx(text, limitPx, font){
     if (measurePx(test + ELLIPSIS, font) <= limitPx){ out.push(w); } else break;
   }
   if (!out.length){
-    let base=''; for (const ch of t){ const cand=base+ch; if (measurePx(cand+ELLIPSIS,font)<=limitPx) base=cand; else break; }
+    let base='';
+    for (const ch of t){
+      const cand=base+ch;
+      if (measurePx(cand+ELLIPSIS,font)<=limitPx) base=cand; else break;
+    }
     return (base||t.slice(0,1))+ELLIPSIS;
   }
   return out.join(' ') + ELLIPSIS;
 }
 
-/* تقييم بسيط للعنوان */
 const POWER = ['دليل','أفضل','خطوة بخطوة','شامل','سريع','عملي'];
 function scoreTitle(t){
   t = normalizeWS(t);
@@ -394,7 +421,6 @@ function scoreTitle(t){
   return s;
 }
 
-/* تلميع محلي */
 function polishTitle(t){
   t = normalizeWS(t).replace(/[“”"']/g,'').replace(/\s*[\|\-—–]\s*/g,' — ').replace(/\s{2,}/g,' ');
   t = t.replace(/\s*(?:…|\.{3,})\s*$/u,'');
@@ -435,7 +461,9 @@ function render(){
   if (tLen <= 60) pTitle.classList.add('full'); else pTitle.classList.remove('full');
 
   const dom = extractDomain(urlInput.value || 'yourdomain.com');
-  if (!/https?:\/\//i.test(urlInput.value)) urlInput.value = 'https://' + dom + '/' + slugFromTitle(pTitle.textContent || 'أداة-محاكاة-نتائج-بحث');
+  if (!/https?:\/\//i.test(urlInput.value)){
+    urlInput.value = 'https://' + dom + '/' + slugFromTitle(pTitle.textContent || 'أداة-محاكاة-نتائج-بحث');
+  }
 
   if (isMobile){
     pUrl.textContent = cleanUrlForDisplay(urlInput.value || 'yourdomain.com/slug');
@@ -444,7 +472,9 @@ function render(){
     const s = cleanUrlForDisplay(urlInput.value||'');
     pUrl.textContent = measurePx(s,FONTS.url)<=urlLimit? s : trimToPx(s,urlLimit,FONTS.url);
   }
-  urlCountEl.textContent = `${charCount(urlInput.value)} حرف`; urlState.textContent='—'; urlState.className='state';
+  urlCountEl.textContent = `${charCount(urlInput.value)} حرف`;
+  urlState.textContent='—';
+  urlState.className='state';
 
   const dRaw = descInput.value || '';
   descCountEl.textContent = `${charCount(dRaw)} حرف`;
@@ -460,16 +490,23 @@ function render(){
     const fits=(curr,tok)=>measurePx(curr+tok, FONTS.desc)<=linePx;
     for (const tok of tokens){
       if (fits(lines[iLine], tok)) lines[iLine]+=tok;
-      else {
+      else{
         iLine++;
         if (iLine>1){
           let second = lines[1].trimEnd();
           while (second && measurePx(second+ELLIPSIS,FONTS.desc)>linePx){ second = second.replace(/\s*\S+$/,''); }
           lines[1]=second+(second?ELLIPSIS:'');
           break;
-        } else {
+        }else{
           if (measurePx(tok,FONTS.desc)<=linePx) lines[iLine]=tok.replace(/^\s+/,'');
-          else { let piece=''; for (let j=0;j<tok.length;j++){ const c=piece+tok[j]; if (measurePx(c,FONTS.desc)<=linePx) piece=c; else break; } lines[iLine]=piece; }
+          else{
+            let piece='';
+            for (let j=0;j<tok.length;j++){
+              const c=piece+tok[j];
+              if (measurePx(c,FONTS.desc)<=linePx) piece=c; else break;
+            }
+            lines[iLine]=piece;
+          }
         }
       }
     }
@@ -521,11 +558,22 @@ async function aiGenerate(prompt, hints){
     respText = await resp.text();
     if (!resp.ok) throw new Error(respText || `HTTP ${resp.status}`);
     return JSON.parse(respText);
-  }catch(err){ clearTimeout(timeout); throw err; }
+  }catch(err){
+    clearTimeout(timeout);
+    throw err;
+  }
 }
 
-function showErrorMessage(eText){ const el=document.querySelector('#aiErr'); el.hidden = false; el.textContent = eText; }
-function clearError(){ const el=document.querySelector('#aiErr'); el.hidden = true; el.textContent = ""; }
+function showErrorMessage(eText){
+  const el=document.querySelector('#aiErr');
+  el.hidden = false;
+  el.textContent = eText;
+}
+function clearError(){
+  const el=document.querySelector('#aiErr');
+  el.hidden = true;
+  el.textContent = "";
+}
 
 async function generateFromRaw(){
   clearError(); setStatus('', '');
@@ -536,7 +584,9 @@ async function generateFromRaw(){
   const composed = buildAIPrompt(raw, hints);
 
   const generateBtn=document.querySelector('#generateBtn');
-  generateBtn.classList.add('loading'); generateBtn.textContent='... جاري التوليد';
+  generateBtn.classList.add('loading');
+  generateBtn.textContent='... جاري التوليد';
+
   try{
     const out = await aiGenerate(composed, hints);
     if (!out || !out.title || !out.meta){ throw new Error('استجابة غير صالحة من الخادم.'); }
@@ -565,7 +615,7 @@ async function generateFromRaw(){
 
     const dom = extractDomain(document.querySelector('#urlInput').value || 'yourdomain.com');
     const slug = (out.slug && String(out.slug).trim()) || slugFromTitle(title);
-    document.querySelector('#urlInput').value   = 'https://' + dom + '/' + slug;
+    document.querySelector('#urlInput').value = 'https://' + dom + '/' + slug;
 
     const sc = scoreTitle(title);
     setStatus(sc>=5?'ok':sc>=3?'warn':'warn', sc>=5?'تم التوليد والتلميع بجودة عالية.':'تم التوليد مع تحسينات موضعية.');
@@ -573,20 +623,15 @@ async function generateFromRaw(){
     render();
   }catch(err){
     setStatus('bad', 'فشل الاتصال بالـAPI.');
-    let msg = String(err||'');
-    showErrorMessage('فشل التوليد: ' + msg);
+    showErrorMessage('فشل التوليد: ' + String(err||''));
   }finally{
-    generateBtn.classList.remove('loading'); generateBtn.textContent='توليد';
+    generateBtn.classList.remove('loading');
+    generateBtn.textContent='توليد';
   }
 }
 
-/* ========= init ========= */
+/* init */
 (function init(){
-  const titleInput=document.querySelector('#titleInput');
-  const descInput=document.querySelector('#descInput');
-  const urlInput=document.querySelector('#urlInput');
-  const rawInput=document.querySelector('#rawInput');
-
   titleInput.value='أداة محاكاة مجانية لنتائج بحث جوجل (SERP)';
   descInput.value='أداة عملية لكتابة عنوان ووصف ورابط يظهران باحتراف في نتائج البحث، مع قص دقيق بالبكسل وبدون حشو.';
   urlInput.value='https://yourdomain.com/' + slugFromTitle(titleInput.value);
@@ -596,25 +641,31 @@ async function generateFromRaw(){
     const wc=(rawInput.value.trim().match(/[\p{L}\p{N}’']+/gu)||[]).length;
     document.querySelector('#wordInfo').textContent=`${wc} كلمة`;
   });
+
   titleInput.addEventListener('input', render);
   descInput .addEventListener('input', render);
   urlInput  .addEventListener('input', render);
-  const ap=document.querySelector('#autoPolish'); if (ap) ap.addEventListener('change', ()=>setStatus('', ''));
 
-  document.querySelector('#clearBtn').addEventListener('click', ()=>{ titleInput.value=''; descInput.value=''; urlInput.value=''; render(); });
-  document.querySelector('#clearAllBtn').addEventListener('click', ()=>{ rawInput.value=''; document.querySelector('#wordInfo').textContent='0 كلمة'; setStatus('', ''); });
+  const ap=document.querySelector('#autoPolish');
+  if (ap) ap.addEventListener('change', ()=>setStatus('', ''));
+
+  document.querySelector('#clearBtn').addEventListener('click', ()=>{
+    titleInput.value=''; descInput.value=''; urlInput.value=''; render();
+  });
+  document.querySelector('#clearAllBtn').addEventListener('click', ()=>{
+    rawInput.value='';
+    document.querySelector('#wordInfo').textContent='0 كلمة';
+    setStatus('', '');
+  });
+
   document.querySelector('#copyTitleBtn').addEventListener('click', ()=>navigator.clipboard.writeText(titleInput.value));
   document.querySelector('#copyDescBtn') .addEventListener('click', ()=>navigator.clipboard.writeText(descInput.value));
-  document.querySelector('#copyPreviewBtn').addEventListener('click', ()=>navigator.clipboard.writeText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n')));
+  document.querySelector('#copyPreviewBtn').addEventListener('click', ()=>{
+    navigator.clipboard.writeText([titleInput.value, cleanUrlForDisplay(urlInput.value), descInput.value].filter(Boolean).join('\n'));
+  });
 
   document.querySelector('#backBtn').addEventListener('click', ()=>history.back());
-  document.querySelector('#homeBtn').addEventListener('click', ()=>{}); // رابط مباشر
-  document.querySelector('#darkBtn').addEventListener('click', ()=>{
-    document.body.classList.toggle('dark');
-    const on=document.body.classList.contains('dark');
-    document.querySelector('#darkBtn').setAttribute('aria-pressed', on);
-    document.querySelector('#darkBtn').textContent = on ? 'الوضع الفاتح' : 'الوضع الداكن';
-  });
+
   document.querySelector('#generateBtn').addEventListener('click', ()=>{
     if (!rawInput.value.trim()){
       rawInput.value = [titleInput.value, descInput.value].join('\n');
